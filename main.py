@@ -1,13 +1,15 @@
 # i want to visualize the MainWindow applicatrion using PyQt5
 
 from PyQt5 import QtWidgets, uic
+from MainWindow import Ui_MainWindow
 import sys
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         # Load the UI file
-        uic.loadUi('MainWindow.ui', self)
+        self.setupUi(self)
+        #uic.loadUi('MainWindow.ui', self)
         self.show()
 
 def main():
