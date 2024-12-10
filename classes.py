@@ -25,17 +25,17 @@ class InputWindow(QtWidgets.QLabel):
             self.browsed = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
             self.height, self.width = self.browsed.shape
             self.addImage()
+            self.updateScaledImage()
             self.isBrowsed.emit(file_path)
     
     def addImage(self):
         img = cv2.resize(self.browsed, (self.width, self.height))
         q_image = QImage(img.data, self.width, self.height, self.width, QImage.Format_Grayscale8)
-
         self.image = QPixmap.fromImage(q_image)
-        self.updateScaledImage()
 
     def updateScaledImage(self, event = None):
         if self.image:
+            self.clear()
             scaled_pixmap = self.image.scaled(self.size(), transformMode= Qt.SmoothTransformation)
             self.setPixmap(scaled_pixmap)         
 
