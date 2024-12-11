@@ -7,39 +7,40 @@ import numpy as np
 
 
 class InputWindow(QtWidgets.QLabel):
+    isBrowsed = pyqtSignal(str)
     imageUpdatedSignal = pyqtSignal()
     
     def __init__(self, parent = None):
         super().__init__(parent)
+        self.browsed = None
+        self.height = 0
+        self.width = 0
         self.image = None
         self.last_window_state = self.window().windowState()
         self.mouseDoubleClickEvent = self.browseImage
-        #self.resizeEvent = self.updateScaledImage
         
     def browseImage(self, event):
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, directory='"D:\FT-Magnitude-Phase-Mixer"',filter= 'Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tiff)', options=options)
         if file_path:
-           cv_image = cv2.imread(file_path)
-           cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-           height, width = cv_image_rgb.shape
-           q_image = QImage(cv_image_rgb.data, width, height, width, QImage.Format_Grayscale8)
-
-           self.image = QPixmap.fromImage(q_image)
-           self.updateScaledImage()
+            cv_image = cv2.imread(file_path)
+            self.browsed = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            self.height, self.width = self.browsed.shape
+            self.addImage()
+            self.updateScaledImage()
+            self.isBrowsed.emit(file_path)
+    
+    def addImage(self):
+        img = cv2.resize(self.browsed, (self.width, self.height))
+        q_image = QImage(img.data, self.width, self.height, self.width, QImage.Format_Grayscale8)
+        self.image = QPixmap.fromImage(q_image)
 
     def updateScaledImage(self, event = None):
         if self.image:
+            self.clear()
             scaled_pixmap = self.image.scaled(self.size(), transformMode= Qt.SmoothTransformation)
-            self.setPixmap(scaled_pixmap)
-            self.imageUpdatedSignal.emit()
-    
-    
-     
-
-            
-            
-            
+            self.setPixmap(scaled_pixmap)         
+            self.imageUpdatedSignal.emit()           
             
 
 class ComponentWindow(QtWidgets.QLabel):
@@ -86,11 +87,6 @@ class ComponentWindow(QtWidgets.QLabel):
             self.spectrumUpdatedSignal.emit()
             
             
-            
-        
-        
-        
-
 class OutputWindow(QtWidgets.QLabel):
     def __init__(self, component_instance1, component_instance2, component_instance3, component_instance4, parent = None):
         super().__init__(parent)   
