@@ -110,6 +110,19 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setContentsMargins(0, -1, -1, -1)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.combo1 = QtWidgets.QComboBox(self.frame)
+        self.combo1.setStyleSheet("QComboBox {\n"
+"    font-family: \"Overpass\";\n"
+"    font-weight: 600; /* Semibold */\n"
+"    font-size: 10pt; /* Adjust the font size as needed */\n"
+"    color: white; /* Set the text color to white */\n"
+"    border: 1px solid white; /* Set the border to 1px solid white */\n"
+"background: rgba(74, 74, 74, 0);\n"
+"    border-radius: 10px;\n"
+"}")
+        self.combo1.setObjectName("combo1")
+        self.combo1.addItem("")
+        self.combo1.addItem("")
         self.line_10 = QtWidgets.QFrame(self.frame)
         self.line_10.setStyleSheet("/* Line style */\n"
 "\n"
@@ -131,7 +144,7 @@ class Ui_MainWindow(object):
 "\n"
 "\n"
 "\n"
-"")
+"")     
         self.line_10.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_10.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_10.setObjectName("line_10")
@@ -173,7 +186,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_3.setObjectName("label_3")
         self.verticalLayout_2.addWidget(self.label_3, 0, QtCore.Qt.AlignHCenter)
-        self.component_image1 = ComponentWindow(self.frame)
+        self.component_image1 = ComponentWindow(self.original1, self.combo1, self.frame)
         self.component_image1.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image1.setObjectName("component_image1")
         self.verticalLayout_2.addWidget(self.component_image1)
@@ -192,19 +205,7 @@ class Ui_MainWindow(object):
         self.Slider_weight1.setOrientation(QtCore.Qt.Horizontal)
         self.Slider_weight1.setObjectName("Slider_weight1")
         self.horizontalLayout.addWidget(self.Slider_weight1)
-        self.combo1 = QtWidgets.QComboBox(self.frame)
-        self.combo1.setStyleSheet("QComboBox {\n"
-"    font-family: \"Overpass\";\n"
-"    font-weight: 600; /* Semibold */\n"
-"    font-size: 10pt; /* Adjust the font size as needed */\n"
-"    color: white; /* Set the text color to white */\n"
-"    border: 1px solid white; /* Set the border to 1px solid white */\n"
-"background: rgba(74, 74, 74, 0);\n"
-"    border-radius: 10px;\n"
-"}")
-        self.combo1.setObjectName("combo1")
-        self.combo1.addItem("")
-        self.combo1.addItem("")
+        
         self.horizontalLayout.addWidget(self.combo1)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
         self.verticalLayout_left.addWidget(self.frame)
@@ -221,6 +222,19 @@ class Ui_MainWindow(object):
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setContentsMargins(0, -1, -1, -1)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.combo2  = QtWidgets.QComboBox(self.frame_2)
+        self.combo2.setStyleSheet("QComboBox {\n"
+"    font-family: \"Overpass\";\n"
+"    font-weight: 600; /* Semibold */\n"
+"    font-size: 10pt; /* Adjust the font size as needed */\n"
+"    color: white; /* Set the text color to white */\n"
+"    border: 1px solid white; /* Set the border to 1px solid white */\n"
+"background: rgba(74, 74, 74, 0);\n"
+"    border-radius: 10px;\n"
+"}")
+        self.combo2.setObjectName("combo2")
+        self.combo2.addItem("")
+        self.combo2.addItem("")
         self.line_12 = QtWidgets.QFrame(self.frame_2)
         self.line_12.setStyleSheet("/* Line style */\n"
 "\n"
@@ -281,7 +295,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_6.setObjectName("label_6")
         self.verticalLayout_6.addWidget(self.label_6, 0, QtCore.Qt.AlignHCenter)
-        self.component_image2 = ComponentWindow(self.frame_2)
+        self.component_image2 = ComponentWindow(self.original2, self.combo2, self.frame_2)
         self.component_image2.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image2.setObjectName("component_image2")
         self.verticalLayout_6.addWidget(self.component_image2)
@@ -300,19 +314,7 @@ class Ui_MainWindow(object):
         self.Slider_weight2.setOrientation(QtCore.Qt.Horizontal)
         self.Slider_weight2.setObjectName("Slider_weight2")
         self.horizontalLayout_3.addWidget(self.Slider_weight2)
-        self.combo2 = QtWidgets.QComboBox(self.frame_2)
-        self.combo2.setStyleSheet("QComboBox {\n"
-"    font-family: \"Overpass\";\n"
-"    font-weight: 600; /* Semibold */\n"
-"    font-size: 10pt; /* Adjust the font size as needed */\n"
-"    color: white; /* Set the text color to white */\n"
-"    border: 1px solid white; /* Set the border to 1px solid white */\n"
-"background: rgba(74, 74, 74, 0);\n"
-"    border-radius: 10px;\n"
-"}")
-        self.combo2.setObjectName("combo2")
-        self.combo2.addItem("")
-        self.combo2.addItem("")
+        
         self.horizontalLayout_3.addWidget(self.combo2)
         self.gridLayout_2.addLayout(self.horizontalLayout_3, 1, 0, 1, 1)
         self.verticalLayout_left.addWidget(self.frame_2)
@@ -330,6 +332,19 @@ class Ui_MainWindow(object):
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
         self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.combo3 = QtWidgets.QComboBox(self.frame_3)
+        self.combo3.setStyleSheet("QComboBox {\n"
+"    font-family: \"Overpass\";\n"
+"    font-weight: 600; /* Semibold */\n"
+"    font-size: 10pt; /* Adjust the font size as needed */\n"
+"    color: white; /* Set the text color to white */\n"
+"    border: 1px solid white; /* Set the border to 1px solid white */\n"
+"background: rgba(74, 74, 74, 0);\n"
+"    border-radius: 10px;\n"
+"}")
+        self.combo3.setObjectName("combo3")
+        self.combo3.addItem("")
+        self.combo3.addItem("")
         self.line_11 = QtWidgets.QFrame(self.frame_3)
         self.line_11.setStyleSheet("/* Line style */\n"
 "\n"
@@ -390,7 +405,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_9.setObjectName("label_9")
         self.verticalLayout_11.addWidget(self.label_9, 0, QtCore.Qt.AlignHCenter)
-        self.component_image3 =ComponentWindow(self.frame_3)
+        self.component_image3 =ComponentWindow(self.original3, self.combo3, self.frame_3)
         self.component_image3.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image3.setObjectName("component_image3")
         self.verticalLayout_11.addWidget(self.component_image3)
@@ -411,19 +426,7 @@ class Ui_MainWindow(object):
         self.Slider_weight3.setOrientation(QtCore.Qt.Horizontal)
         self.Slider_weight3.setObjectName("Slider_weight3")
         self.horizontalLayout_5.addWidget(self.Slider_weight3)
-        self.combo3 = QtWidgets.QComboBox(self.frame_3)
-        self.combo3.setStyleSheet("QComboBox {\n"
-"    font-family: \"Overpass\";\n"
-"    font-weight: 600; /* Semibold */\n"
-"    font-size: 10pt; /* Adjust the font size as needed */\n"
-"    color: white; /* Set the text color to white */\n"
-"    border: 1px solid white; /* Set the border to 1px solid white */\n"
-"background: rgba(74, 74, 74, 0);\n"
-"    border-radius: 10px;\n"
-"}")
-        self.combo3.setObjectName("combo3")
-        self.combo3.addItem("")
-        self.combo3.addItem("")
+        
         self.horizontalLayout_5.addWidget(self.combo3)
         self.gridLayout_3.addLayout(self.horizontalLayout_5, 1, 0, 1, 1)
         self.verticalLayout_right.addWidget(self.frame_3)
@@ -438,6 +441,19 @@ class Ui_MainWindow(object):
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.verticalLayout_12 = QtWidgets.QVBoxLayout()
         self.verticalLayout_12.setObjectName("verticalLayout_12")
+        self.combo4 = QtWidgets.QComboBox(self.frame_4)
+        self.combo4.setStyleSheet("QComboBox {\n"
+"    font-family: \"Overpass\";\n"
+"    font-weight: 600; /* Semibold */\n"
+"    font-size: 10pt; /* Adjust the font size as needed */\n"
+"    color: white; /* Set the text color to white */\n"
+"    border: 1px solid white; /* Set the border to 1px solid white */\n"
+"background: rgba(74, 74, 74, 0);\n"
+"    border-radius: 10px;\n"
+"}")
+        self.combo4.setObjectName("combo4")
+        self.combo4.addItem("")
+        self.combo4.addItem("")
         self.line_14 = QtWidgets.QFrame(self.frame_4)
         self.line_14.setStyleSheet("/* Line style */\n"
 "\n"
@@ -498,7 +514,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_12.setObjectName("label_12")
         self.verticalLayout_14.addWidget(self.label_12, 0, QtCore.Qt.AlignHCenter)
-        self.component_image4 = ComponentWindow(self.frame_4)
+        self.component_image4 = ComponentWindow(self.original4, self.combo4, self.frame_4)
         self.component_image4.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image4.setObjectName("component_image4")
         self.verticalLayout_14.addWidget(self.component_image4)
@@ -517,19 +533,7 @@ class Ui_MainWindow(object):
         self.Slider_weight4.setOrientation(QtCore.Qt.Horizontal)
         self.Slider_weight4.setObjectName("Slider_weight4")
         self.horizontalLayout_7.addWidget(self.Slider_weight4)
-        self.combo4 = QtWidgets.QComboBox(self.frame_4)
-        self.combo4.setStyleSheet("QComboBox {\n"
-"    font-family: \"Overpass\";\n"
-"    font-weight: 600; /* Semibold */\n"
-"    font-size: 10pt; /* Adjust the font size as needed */\n"
-"    color: white; /* Set the text color to white */\n"
-"    border: 1px solid white; /* Set the border to 1px solid white */\n"
-"background: rgba(74, 74, 74, 0);\n"
-"    border-radius: 10px;\n"
-"}")
-        self.combo4.setObjectName("combo4")
-        self.combo4.addItem("")
-        self.combo4.addItem("")
+        
         self.horizontalLayout_7.addWidget(self.combo4)
         self.gridLayout_4.addLayout(self.horizontalLayout_7, 1, 0, 1, 1)
         self.verticalLayout_right.addWidget(self.frame_4)
@@ -628,7 +632,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_op1.setObjectName("label_op1")
         self.verticalLayout_OP1.addWidget(self.label_op1, 0, QtCore.Qt.AlignHCenter)
-        self.output1_port = OutputWindow(self.frame_right)
+        self.output1_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.frame_right)
         self.output1_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output1_port.setObjectName("output1_port")
         self.verticalLayout_OP1.addWidget(self.output1_port)
@@ -647,7 +651,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_op2.setObjectName("label_op2")
         self.verticalLayout_OP2.addWidget(self.label_op2, 0, QtCore.Qt.AlignHCenter)
-        self.output2_port = OutputWindow(self.frame_right)
+        self.output2_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.frame_right)
         self.output2_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output2_port.setObjectName("output2_port")
         self.verticalLayout_OP2.addWidget(self.output2_port)
