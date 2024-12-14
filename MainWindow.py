@@ -186,7 +186,36 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_3.setObjectName("label_3")
         self.verticalLayout_2.addWidget(self.label_3, 0, QtCore.Qt.AlignHCenter)
-        self.component_image1 = ComponentWindow(self.original1, self.combo1, self.frame)
+        self.frame_right = QtWidgets.QFrame(self.centralwidget)
+        self.frame_right.setStyleSheet("background-color: rgb(39, 44, 54);\n"
+"border-radius: 10px;\n"
+"border: none;")
+        self.frame_right.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_right.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_right.setObjectName("frame_right")
+        self.mode1 = QtWidgets.QRadioButton(self.frame_right)
+        font = QtGui.QFont()
+        font.setFamily("Oswald SemiBold")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.mode1.setFont(font)
+        self.mode1.setStyleSheet("color:white;\n"
+"font-weight:10000px;\n"
+"")
+        self.mode1.setObjectName("mode1")
+        
+        self.mode2 = QtWidgets.QRadioButton(self.frame_right)
+        font = QtGui.QFont()
+        font.setFamily("Oswald SemiBold")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.mode2.setFont(font)
+        self.mode2.setStyleSheet("color:white;\n"
+"font-weight:10000px;")
+        self.mode2.setObjectName("mode2")
+        self.component_image1 = ComponentWindow(self.original1, self.combo1, self.mode1, self.mode2, self.frame)
         self.component_image1.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image1.setObjectName("component_image1")
         self.verticalLayout_2.addWidget(self.component_image1)
@@ -295,7 +324,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_6.setObjectName("label_6")
         self.verticalLayout_6.addWidget(self.label_6, 0, QtCore.Qt.AlignHCenter)
-        self.component_image2 = ComponentWindow(self.original2, self.combo2, self.frame_2)
+        self.component_image2 = ComponentWindow(self.original2, self.combo2, self.mode1, self.mode2, self.frame_2)
         self.component_image2.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image2.setObjectName("component_image2")
         self.verticalLayout_6.addWidget(self.component_image2)
@@ -405,7 +434,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_9.setObjectName("label_9")
         self.verticalLayout_11.addWidget(self.label_9, 0, QtCore.Qt.AlignHCenter)
-        self.component_image3 =ComponentWindow(self.original3, self.combo3, self.frame_3)
+        self.component_image3 =ComponentWindow(self.original3, self.combo3, self.mode1, self.mode2, self.frame_3)
         self.component_image3.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image3.setObjectName("component_image3")
         self.verticalLayout_11.addWidget(self.component_image3)
@@ -514,7 +543,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_12.setObjectName("label_12")
         self.verticalLayout_14.addWidget(self.label_12, 0, QtCore.Qt.AlignHCenter)
-        self.component_image4 = ComponentWindow(self.original4, self.combo4, self.frame_4)
+        self.component_image4 = ComponentWindow(self.original4, self.combo4, self.mode1, self.mode2, self.frame_4)
         self.component_image4.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.component_image4.setObjectName("component_image4")
         self.verticalLayout_14.addWidget(self.component_image4)
@@ -538,13 +567,7 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addLayout(self.horizontalLayout_7, 1, 0, 1, 1)
         self.verticalLayout_right.addWidget(self.frame_4)
         self.horizontalLayout_11.addLayout(self.verticalLayout_right)
-        self.frame_right = QtWidgets.QFrame(self.centralwidget)
-        self.frame_right.setStyleSheet("background-color: rgb(39, 44, 54);\n"
-"border-radius: 10px;\n"
-"border: none;")
-        self.frame_right.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_right.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_right.setObjectName("frame_right")
+        
         self.verticalLayout_18 = QtWidgets.QVBoxLayout(self.frame_right)
         self.verticalLayout_18.setObjectName("verticalLayout_18")
         self.mixerOutputTo = QtWidgets.QLabel(self.frame_right)
@@ -557,6 +580,8 @@ class Ui_MainWindow(object):
         self.mixerOutputTo.setStyleSheet("color:white;\n"
 "font-size:20px;\n"
 "margin: 0 0 ;")
+        
+        
         self.mixerOutputTo.setObjectName("mixerOutputTo")
         self.verticalLayout_18.addWidget(self.mixerOutputTo, 0, QtCore.Qt.AlignHCenter)
         self.line_15 = QtWidgets.QFrame(self.frame_right)
@@ -632,7 +657,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_op1.setObjectName("label_op1")
         self.verticalLayout_OP1.addWidget(self.label_op1, 0, QtCore.Qt.AlignHCenter)
-        self.output1_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.frame_right)
+        self.output1_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.mode2, self.frame_right)
         self.output1_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output1_port.setObjectName("output1_port")
         self.verticalLayout_OP1.addWidget(self.output1_port)
@@ -651,7 +676,7 @@ class Ui_MainWindow(object):
 "font-weight:10000px;")
         self.label_op2.setObjectName("label_op2")
         self.verticalLayout_OP2.addWidget(self.label_op2, 0, QtCore.Qt.AlignHCenter)
-        self.output2_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.frame_right)
+        self.output2_port = OutputWindow(self.component_image1, self.component_image2, self.component_image3, self.component_image4, self.mode2, self.frame_right)
         self.output2_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output2_port.setObjectName("output2_port")
         self.verticalLayout_OP2.addWidget(self.output2_port)
@@ -865,33 +890,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_14.setObjectName("horizontalLayout_14")
         self.verticalLayout_21 = QtWidgets.QVBoxLayout()
         self.verticalLayout_21.setObjectName("verticalLayout_21")
-        self.mode1 = QtWidgets.QRadioButton(self.frame_right)
-        font = QtGui.QFont()
-        font.setFamily("Oswald SemiBold")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
-        self.mode1.setFont(font)
-        self.mode1.setStyleSheet("color:white;\n"
-"font-weight:10000px;\n"
-"")
-        self.mode1.setObjectName("mode1")
+        
         self.buttonGroup_3 = QtWidgets.QButtonGroup(MainWindow)
         self.buttonGroup_3.setObjectName("buttonGroup_3")
         self.buttonGroup_3.addButton(self.mode1)
         self.verticalLayout_21.addWidget(self.mode1, 0, QtCore.Qt.AlignHCenter)
         spacerItem = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.verticalLayout_21.addItem(spacerItem)
-        self.mode2 = QtWidgets.QRadioButton(self.frame_right)
-        font = QtGui.QFont()
-        font.setFamily("Oswald SemiBold")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
-        self.mode2.setFont(font)
-        self.mode2.setStyleSheet("color:white;\n"
-"font-weight:10000px;")
-        self.mode2.setObjectName("mode2")
+        
         self.buttonGroup_3.addButton(self.mode2)
         self.verticalLayout_21.addWidget(self.mode2, 0, QtCore.Qt.AlignHCenter)
         self.horizontalLayout_14.addLayout(self.verticalLayout_21)
@@ -946,13 +952,17 @@ class Ui_MainWindow(object):
         self.selectedArea_2.setText(_translate("MainWindow", "Select Mode"))
         self.mode1.setText(_translate("MainWindow", "Mag and Phase"))
         self.mode2.setText(_translate("MainWindow", "Real and Imaginary"))
+        self.mode1.setChecked(True)
+        self.radioButton1.setChecked(True)
+        
+        
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     import sys
+#     app = QtWidgets.QApplication(sys.argv)
+#     MainWindow = QtWidgets.QMainWindow()
+#     ui = Ui_MainWindow()
+#     ui.setupUi(MainWindow)
+#     MainWindow.show()
+#     sys.exit(app.exec_())
