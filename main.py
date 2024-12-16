@@ -28,29 +28,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.original4.imageUpdatedSignal.connect(self.selectOutputPort)
         
     def setupVariables(self):
-        self.minWidth = 300
-        self.minHeight = 300
         self.imageContainers = [self.original1, self.original2, self.original3, self.original4]
     
     def addEventListeners(self):
-        # for img in self.imageContainers:
-        #     img.isBrowsed.connect(self.uniformSize)
         pass
-
-    # def uniformSize(self):
-    #     for img in self.imageContainers:
-    #         if img.width != 0:
-    #             if (self.minWidth == 0 or (img.width * img.height < self.minWidth * self.minHeight)):
-    #                 self.minWidth = img.width
-    #                 self.minHeight = img.height
-                    
-
-    #     if self.minWidth != 0:    
-    #         for img in self.imageContainers:
-    #             if img.width != 0 and img.uploaded:
-    #                 img.width = self.minWidth 
-    #                 img.height = self.minHeight 
-    #                 img.addImage()
     
     def selectOutputPort(self):
         if self.radioButton1.isChecked():
@@ -63,10 +44,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.output2_port.output_scaled_pixmap is not None:
                 self.output2_port.setPixmap(self.output2_port.output_scaled_pixmap)
             
-    
-
-        
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
