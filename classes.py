@@ -106,9 +106,7 @@ class ComponentWindow(QtWidgets.QLabel):
         self.realImaginary_radio.toggled.connect(self.selectMode)  # when toggling the radio btn, go to selectMode method to choose the selected mode and show the corresponding spectrum
     
     def computeFreqComponents(self):
-        if self.original_window_instance.image:
-            # changing the pixmap to a 2d array (image height, image width) to compute its fourier components
-           
+        if self.original_window_instance.image:           
             original_q_image = self.original_window_instance.q_image
             width = self.original_window_instance.width  # width and height are used in forming the shape(dimensions) of the formed array
             height = self.original_window_instance.height 
@@ -144,8 +142,7 @@ class ComponentWindow(QtWidgets.QLabel):
                 self.showMagPhaseComponent()
             else:
                 self.showRealImagComponent()
-    
-    
+     
     def selectMode(self):    # select 'mag and phase' mode or 'real and img' mode according to the selected radio button
         if not self.realImaginary_radio.isChecked(): 
             self.mode_combo_box.setItemText(0, _translate("MainWindow", "FT Magnitude"))
@@ -157,10 +154,6 @@ class ComponentWindow(QtWidgets.QLabel):
             self.mode_combo_box.setItemText(0, _translate("MainWindow", "FT Real"))
             self.mode_combo_box.setItemText(1, _translate("MainWindow", "FT Img"))
             self.showRealImagComponent()
-            
-            
-            
-
     
     def showMagPhaseComponent(self):
         if self.freq_components is not None:  # if there is an image found whose fft is computed (the label isn't empty)
@@ -173,8 +166,7 @@ class ComponentWindow(QtWidgets.QLabel):
             freq_spectrum_pixmap = QPixmap.fromImage(freq_q_image)    #changing from qimage to pixmap
             freq_spectrum_scaled_pixmap = freq_spectrum_pixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation) # scaling the freq spectrum img(after changing to pixmap) to be equal to the label size
             self.setPixmap(freq_spectrum_scaled_pixmap)   #showing the scaled pixmap
-            self.spectrumUpdatedSignal.emit()
-        
+            self.spectrumUpdatedSignal.emit()  
         
     def showRealImagComponent(self):
         if self.freq_components is not None:
@@ -191,17 +183,16 @@ class ComponentWindow(QtWidgets.QLabel):
             self.setPixmap(freq_spectrum_scaled_pixmap) 
             self.spectrumUpdatedSignal.emit()
             
-            
-            
-            
+                     
 class OutputWindow(QtWidgets.QLabel):
-    def __init__(self, component_instance1, component_instance2, component_instance3, component_instance4, realImaginary_radio, parent = None):
+    def __init__(self, component_instance1, component_instance2, component_instance3, component_instance4, weights, realImaginary_radio, parent = None):
         super().__init__(parent)   
         self.setFixedSize(300, 300)
         self.component_instance1 = component_instance1
         self.component_instance2 = component_instance2
         self.component_instance3 = component_instance3
         self.component_instance4 = component_instance4
+        self.weights = weights
         self.realImaginary_radio = realImaginary_radio
         self.output_scaled_pixmap = None
         
@@ -222,40 +213,40 @@ class OutputWindow(QtWidgets.QLabel):
             component1_phases = self.component_instance1.phase_spectrum
             component1_real = self.component_instance1.real_spectrum
             component1_imaginary = self.component_instance1.imaginary_spectrum
-            self.total_magnitudes += component1_magnitudes 
-            self.total_phases += component1_phases
-            self.total_real += component1_real
-            self.total_imaginary += component1_imaginary
+            self.total_magnitudes += self.weights[0].value() / 100.0 * component1_magnitudes 
+            self.total_phases += self.weights[0].value() / 100.0 * component1_phases
+            self.total_real += self.weights[0].value() / 100.0 * component1_real
+            self.total_imaginary += self.weights[0].value() / 100.0 * component1_imaginary
         # mixing second frequency components
         if self.component_instance2.freq_components is not None:
             component2_magnitudes = self.component_instance2.magnitude_spectrum
             component2_phases = self.component_instance2.phase_spectrum
             component2_real = self.component_instance2.real_spectrum
             component2_imaginary = self.component_instance2.imaginary_spectrum
-            self.total_magnitudes += component2_magnitudes 
-            self.total_phases += component2_phases
-            self.total_real += component2_real
-            self.total_imaginary += component2_imaginary
+            self.total_magnitudes += self.weights[1].value() / 100.0 * component2_magnitudes 
+            self.total_phases += self.weights[1].value() / 100.0 * component2_phases
+            self.total_real += self.weights[1].value() / 100.0 * component2_real
+            self.total_imaginary += self.weights[1].value() / 100.0 * component2_imaginary
         # mixing third frequency componenets
         if self.component_instance3.freq_components is not None:
             component3_magnitudes = self.component_instance3.magnitude_spectrum
             component3_phases = self.component_instance3.phase_spectrum
             component3_real = self.component_instance3.real_spectrum
             component3_imaginary = self.component_instance3.imaginary_spectrum
-            self.total_magnitudes += component3_magnitudes 
-            self.total_phases += component3_phases
-            self.total_real += component3_real
-            self.total_imaginary += component3_imaginary
+            self.total_magnitudes += self.weights[2].value()  / 100.0 * component3_magnitudes 
+            self.total_phases += self.weights[2].value()  / 100.0 * component3_phases
+            self.total_real += self.weights[2].value()  / 100.0 * component3_real
+            self.total_imaginary += self.weights[2].value()  / 100.0 * component3_imaginary
         # mixing fourth frequency components
         if self.component_instance4.freq_components is not None:
             component4_magnitudes = self.component_instance4.magnitude_spectrum
             component4_phases = self.component_instance4.phase_spectrum
             component4_real = self.component_instance4.real_spectrum
             component4_imaginary = self.component_instance4.imaginary_spectrum
-            self.total_magnitudes += component4_magnitudes 
-            self.total_phases += component4_phases
-            self.total_real += component4_real
-            self.total_imaginary += component4_imaginary
+            self.total_magnitudes += self.weights[3].value()  / 100.0 * component4_magnitudes 
+            self.total_phases += self.weights[3].value()  / 100.0 * component4_phases
+            self.total_real += self.weights[3].value()  / 100.0 * component4_real
+            self.total_imaginary += self.weights[3].value()  / 100.0 * component4_imaginary
             
         if not self.realImaginary_radio.isChecked(): 
             reconstructed_freq_components = self.total_magnitudes * np.exp(1j * self.total_phases)

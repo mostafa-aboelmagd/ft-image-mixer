@@ -29,6 +29,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def setupVariables(self):
         self.imageContainers = [self.original1, self.original2, self.original3, self.original4]
+        self.sliders = [self.Slider_weight1, self.Slider_weight2, self.Slider_weight3, self.Slider_weight4]
+        for slider in self.sliders:
+            slider.setMinimum(0)
+            slider.setMaximum(100)
+            slider.setValue(100)
+            slider.setTickInterval(10)
     
     def addEventListeners(self):
         pass
