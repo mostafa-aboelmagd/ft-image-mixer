@@ -1,8 +1,10 @@
+import pyqtgraph as pg
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QLabel, QVBoxLayout
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QColor
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QEvent, pyqtSignal
+from PyQt5.QtCore import Qt, QRect, QPoint, QEvent, pyqtSignal
+from PyQt5.QtGui import QPainter
 import cv2
 import numpy as np
 _translate = QtCore.QCoreApplication.translate
@@ -90,9 +92,10 @@ class InputWindow(QtWidgets.QLabel):
             self.mousePressed = False    
 
 class ComponentWindow(QtWidgets.QLabel):
+    regionChanged = pyqtSignal(str)
     spectrumUpdatedSignal = pyqtSignal()
     
-    def __init__(self, input_window_instance, mode_combo_box, magPhase_radio, realImaginary_radio, parent = None):
+    def __init__(self, input_window_instance, mode_combo_box, magPhase_radio, realImaginary_radio, innerRegion, parent = None):
         super().__init__(parent)
         self.setFixedSize(300, 300)
         self.original_window_instance = input_window_instance
@@ -104,6 +107,146 @@ class ComponentWindow(QtWidgets.QLabel):
 
         self.mode_combo_box.currentIndexChanged.connect(self.selectMode) # when toggling the comboBox, go to selectMode method which leads you to showing the correct spectrum
         self.realImaginary_radio.toggled.connect(self.selectMode)  # when toggling the radio btn, go to selectMode method to choose the selected mode and show the corresponding spectrum
+        
+        # Initialize the region selector
+        self.rect = QRect(0, 0, 0, 0)
+        self.resizing = False
+        self.corner = None
+        self.innerRegion = innerRegion
+        self.innerRegion.toggled.connect(self.onRegionToggled)
+        self.updateRectangleSize()  # Set the initial size and position of the rectangle
+    
+    def onRegionToggled(self):
+        self.update()  # Schedule a repaint of the QLabel
+
+    def getRectangleVertices(self):
+        return {
+            "topLeft": self.rect.topLeft(),
+            "topRight": self.rect.topRight(),
+            "bottomLeft": self.rect.bottomLeft(),
+            "bottomRight": self.rect.bottomRight(),
+        }
+    
+    def setRectangle(self, topLeft, topRight, bottomLeft, bottomRight):
+        # Ensure the rectangle is valid
+        if topLeft.x() >= topRight.x() or bottomLeft.x() >= bottomRight.x() or topLeft.y() >= bottomLeft.y() or topRight.y() >= bottomRight.y():
+            print("Invalid rectangle: Vertices overlap or cross boundaries.")
+            return
+
+        # Set the rectangle based on the provided vertices
+        self.rect.setTopLeft(topLeft)
+        self.rect.setTopRight(topRight)
+        self.rect.setBottomLeft(bottomLeft)
+        self.rect.setBottomRight(bottomRight)
+
+        # Constrain the rectangle within the QLabel's bounds
+        self.rect.setLeft(max(0, self.rect.left()))
+        self.rect.setTop(max(0, self.rect.top()))
+        self.rect.setRight(min(self.width(), self.rect.right()))
+        self.rect.setBottom(min(self.height(), self.rect.bottom()))
+
+        # Trigger repaint and notify listeners
+        self.update()
+            
+    def updateRectangleSize(self):
+        # Center the rectangle and make it span the full width and height of the QLabel
+        labelWidth = self.width()
+        labelHeight = self.height()
+        self.rect = QRect(0, 0, labelWidth, labelHeight)
+
+    def mousePressEvent(self, event):
+        # Check if the user clicked on any of the rectangle's corners or edges
+        if self.rect.contains(event.pos()):
+            self.resizing = True
+            self.corner = self.getCorner(event.pos())
+
+    def mouseMoveEvent(self, event):
+        if self.resizing and self.corner:
+            new_rect = self.rect
+
+            # Update the rectangle size based on the corner being dragged
+            if self.corner == "top_left":
+                new_rect.setTopLeft(event.pos())
+            elif self.corner == "top_right":
+                new_rect.setTopRight(event.pos())
+            elif self.corner == "bottom_left":
+                new_rect.setBottomLeft(event.pos())
+            elif self.corner == "bottom_right":
+                new_rect.setBottomRight(event.pos())
+
+            # Constrain the rectangle within QLabel boundaries
+            new_rect.setLeft(max(0, new_rect.left()))
+            new_rect.setTop(max(0, new_rect.top()))
+            new_rect.setRight(min(self.width(), new_rect.right()))
+            new_rect.setBottom(min(self.height(), new_rect.bottom()))
+
+            # Ensure sides do not cross over
+            if new_rect.left() >= new_rect.right():
+                if self.corner in ["top_left", "bottom_left"]:
+                    new_rect.setLeft(new_rect.right() - 5)
+                else:  # top_right or bottom_right
+                    new_rect.setRight(new_rect.left() + 5)
+            if new_rect.top() >= new_rect.bottom():
+                if self.corner in ["top_left", "top_right"]:
+                    new_rect.setTop(new_rect.bottom() - 5)
+                else:  # bottom_left or bottom_right
+                    new_rect.setBottom(new_rect.top() + 5)
+
+            self.rect = new_rect
+            self.update()
+            self.regionChanged.emit("a")
+
+    def mouseReleaseEvent(self, event):
+        self.resizing = False
+        self.corner = None
+
+    def getCorner(self, point):
+        # Margin of error for detecting proximity to corners
+        margin = 20  # Increase the size of the sensitive zone around corners
+
+        # Check proximity to each corner within the margin
+        if abs(point.x() - self.rect.left()) < margin and abs(point.y() - self.rect.top()) < margin:
+            return "top_left"
+        elif abs(point.x() - self.rect.right()) < margin and abs(point.y() - self.rect.top()) < margin:
+            return "top_right"
+        elif abs(point.x() - self.rect.left()) < margin and abs(point.y() - self.rect.bottom()) < margin:
+            return "bottom_left"
+        elif abs(point.x() - self.rect.right()) < margin and abs(point.y() - self.rect.bottom()) < margin:
+            return "bottom_right"
+        return None
+
+    def paintEvent(self, event):
+        # Let QLabel handle its default drawing (e.g., rendering the FT component)
+        super().paintEvent(event)
+        
+        transparent_red = QColor(255, 0, 0, 20)
+        painter = QPainter(self)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(transparent_red)
+
+        if self.innerRegion.isChecked():
+            painter.drawRect(self.rect)
+        else:
+            painter.drawRect(0, 0, self.width(), self.rect.top())  # Top area
+            painter.drawRect(0, self.rect.bottom(), self.width(), self.height() - self.rect.bottom())  # Bottom area
+            painter.drawRect(0, self.rect.top(), self.rect.left(), self.rect.height())  # Left area
+            painter.drawRect(self.rect.right(), self.rect.top(), self.width() - self.rect.right(), self.rect.height())  # Right area
+
+        # Optionally, draw resize handles on corners
+        painter.setBrush(Qt.blue)
+        handle_size = 10
+        painter.drawRect(self.rect.topLeft().x() - handle_size, self.rect.topLeft().y() - handle_size, handle_size * 2, handle_size * 2)
+        painter.drawRect(self.rect.topRight().x() - handle_size, self.rect.topRight().y() - handle_size, handle_size * 2, handle_size * 2)
+        painter.drawRect(self.rect.bottomLeft().x() - handle_size, self.rect.bottomLeft().y() - handle_size, handle_size * 2, handle_size * 2)
+        painter.drawRect(self.rect.bottomRight().x() - handle_size, self.rect.bottomRight().y() - handle_size, handle_size * 2, handle_size * 2)
+
+
+    def resizeEvent(self, event):
+        # Update rectangle size only if needed
+        if self.rect.width() > self.width() or self.rect.height() > self.height():
+            self.updateRectangleSize()
+        super().resizeEvent(event)
+    
     
     def computeFreqComponents(self):
         if self.original_window_instance.image:           
@@ -250,10 +393,10 @@ class OutputWindow(QtWidgets.QLabel):
             
         if not self.realImaginary_radio.isChecked(): 
             reconstructed_freq_components = self.total_magnitudes * np.exp(1j * self.total_phases)
-            print("combining mags and phases")
+            #print("combining mags and phases")
         elif self.realImaginary_radio.isChecked(): 
             reconstructed_freq_components = self.total_real + 1j * self.total_imaginary
-            print("combining real and imaginary")
+            #print("combining real and imaginary")
             
         reconstructed_img_array = np.abs(np.fft.ifft2(reconstructed_freq_components))
         reconstructed_img_normalized_array = cv2.normalize(reconstructed_img_array, None, 0, 255,  cv2.NORM_MINMAX).astype(np.uint8)
