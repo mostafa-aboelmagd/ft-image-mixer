@@ -124,12 +124,6 @@ class ComponentWindow(QtWidgets.QLabel):
         self.magPhaseRadio.toggled.connect(self.selectMode)
         self.innerRegion.toggled.connect(self.onRegionToggled)
     
-    # def updateRegionSize(self):
-    #     # Center the rectangle and make it span the full width and height of the QLabel
-    #     labelWidth = self.width()
-    #     labelHeight = self.height()
-    #     self.regionSelector = QRect(0, 0, labelWidth, labelHeight)
-    
     def computeFreqComponents(self):
         if self.originalWindowInstance.image:
             originalQImage = self.originalWindowInstance.q_image
@@ -320,15 +314,7 @@ class ComponentWindow(QtWidgets.QLabel):
         self.regionSelector.setBottom(min(self.height(), self.regionSelector.bottom()))
 
         # Triggers the paintEvent method
-        self.update()
-
-
-    #def resizeEvent(self, event):
-        # Update rectangle size only if needed
-    #    if self.regionSelector.width() > self.width() or self.regionSelector.height() > self.height():
-    #        self.updateRectangleSize()
-    #    super().resizeEvent(event)
-            
+        self.update()            
                      
 class OutputWindow(QtWidgets.QLabel):
     def __init__(self, componentInstances, weights, magPhaseRadio, innerRegion, parent = None):
@@ -389,29 +375,10 @@ class OutputWindow(QtWidgets.QLabel):
                     currReal = np.zeros_like(fullSpectrum)
                     currImaginary = np.zeros_like(fullSpectrum)
 
-                    # Top region
-                    currMagnitude[:yStart, :] = self.componentInstances[i].magnitudeSpectrum[:yStart, :]
-                    currPhase[:yStart, :] = self.componentInstances[i].phaseSpectrum[:yStart, :]
-                    currReal[:yStart, :] = self.componentInstances[i].realSpectrum[:yStart, :]
-                    currImaginary[:yStart, :] = self.componentInstances[i].imaginarySpectrum[:yStart, :]
-
-                    # Bottom region
-                    currMagnitude[yEnd:, :] = self.componentInstances[i].magnitudeSpectrum[yEnd:, :]
-                    currPhase[yEnd:, :] = self.componentInstances[i].phaseSpectrum[yEnd:, :]
-                    currReal[yEnd:, :] = self.componentInstances[i].realSpectrum[yEnd:, :]
-                    currImaginary[yEnd:, :] = self.componentInstances[i].imaginarySpectrum[yEnd:, :]
-
-                    # Left region
-                    currMagnitude[yStart:yEnd, :xStart] = self.componentInstances[i].magnitudeSpectrum[yStart:yEnd, :xStart]
-                    currPhase[yStart:yEnd, :xStart] = self.componentInstances[i].phaseSpectrum[yStart:yEnd, :xStart]
-                    currReal[yStart:yEnd, :xStart] = self.componentInstances[i].realSpectrum[yStart:yEnd, :xStart]
-                    currImaginary[yStart:yEnd, :xStart] = self.componentInstances[i].imaginarySpectrum[yStart:yEnd, :xStart]
-
-                    # Right region
-                    currMagnitude[yStart:yEnd, xEnd:] = self.componentInstances[i].magnitudeSpectrum[yStart:yEnd, xEnd:]
-                    currPhase[yStart:yEnd, xEnd:] = self.componentInstances[i].phaseSpectrum[yStart:yEnd, xEnd:]
-                    currReal[yStart:yEnd, xEnd:] = self.componentInstances[i].realSpectrum[yStart:yEnd, xEnd:]
-                    currImaginary[yStart:yEnd, xEnd:] = self.componentInstances[i].imaginarySpectrum[yStart:yEnd, xEnd:]
+                    self.fillOuterRegions(currMagnitude, self.componentInstances[i].magnitudeSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currPhase, self.componentInstances[i].phaseSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currReal, self.componentInstances[i].realSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currImaginary, self.componentInstances[i].imaginarySpectrum, yStart, yEnd, xStart, xEnd)
 
                 self.totalMagnitudes += self.weights[i].value() / 100.0 * currMagnitude
                 self.totalPhases += self.weights[i].value() / 100.0 * currPhase
@@ -431,3 +398,14 @@ class OutputWindow(QtWidgets.QLabel):
         self.outputScaledPixmap = outputPixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation)
         if self.selected:
             self.setPixmap(self.outputScaledPixmap)
+    
+    # Gets the fourier components of the outer region
+    def fillOuterRegions(self, currSpectrum, sourceSpectrum, yStart, yEnd, xStart, xEnd):
+        # Top region
+        currSpectrum[:yStart, :] = sourceSpectrum[:yStart, :]
+        # Bottom region
+        currSpectrum[yEnd:, :] = sourceSpectrum[yEnd:, :]
+        # Left region
+        currSpectrum[yStart:yEnd, :xStart] = sourceSpectrum[yStart:yEnd, :xStart]
+        # Right region
+        currSpectrum[yStart:yEnd, xEnd:] = sourceSpectrum[yStart:yEnd, xEnd:]

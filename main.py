@@ -13,6 +13,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show()
         
     def setupVariables(self):
+        self.outputPortRadio = self.radioButton1
         self.imageContainers = [self.original1, self.original2, self.original3, self.original4]
         self.fourierContainers = [self.component_image1, self.component_image2, self.component_image3, self.component_image4]
         self.sliders = [self.Slider_weight1, self.Slider_weight2, self.Slider_weight3, self.Slider_weight4]
@@ -26,10 +27,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for container in self.fourierContainers:
             container.regionResizedSignal.connect(self.unifyRegionSelectors)
         
-        self.radioButton1.toggled.connect(self.selectOutputPort)
+        self.outputPortRadio.toggled.connect(self.selectOutputPort)
     
     def unifyRegionSelectors(self):
-        triggeringContainer = self.sender() # gets the currently changed rectangle so that the other rectangles are shaped according to it
+        triggeringContainer = self.sender() # gets the currently changed region so that the other regions are shaped according to it
         vertices = triggeringContainer.getRegionVertices()
         topLeft = vertices["topLeft"]
         topRight = vertices["topRight"]
@@ -40,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             container.setRegion(topLeft, topRight, bottomLeft, bottomRight)
     
     def selectOutputPort(self):
-        if self.radioButton1.isChecked():
+        if self.outputPortRadio.isChecked():
             self.output2_port.clear()
             self.output2_port.selected = False
 
