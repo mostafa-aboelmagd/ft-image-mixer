@@ -72,11 +72,11 @@ class InputWindow(QtWidgets.QLabel):
     # Manipulates Brightness & Contrast of image via moving the mouse horizontally and vertically respectively
     def handleMouseMovement(self, event):
         if self.mousePressed:
+            verticalMovement = self.initialY - event.y()
             horizontalMovement = event.x() - self.initialX
-            verticalMovement = event.y() - self.initialY
 
-            self.currentBrightness = np.clip(self.currentBrightness + horizontalMovement // 10, -50, 200) # Limits the brightness values between -50 and 200
-            self.currentContrast = np.clip(self.currentContrast + (verticalMovement // 100) * 0.1, 0.5, 2.0) # Multiplying by 0.1 prevents major contrast shifts
+            self.currentBrightness = np.clip(self.currentBrightness + verticalMovement // 10, -50, 200) # Limits the brightness values between -50 and 200
+            self.currentContrast = np.clip(self.currentContrast + (horizontalMovement // 100) * 0.1, 0.5, 2.0) # Multiplying by 0.1 prevents major contrast shifts
 
             newImage = cv2.convertScaleAbs(self.originalBrowsed, alpha=self.currentContrast, beta=self.currentBrightness) # alpha scales the pixel values, while beta adds an offset
             newImage = np.clip(newImage, 0, 255) # Ensures that all pixel values are clipped to this valid range
