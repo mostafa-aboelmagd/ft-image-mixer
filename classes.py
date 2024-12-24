@@ -341,15 +341,16 @@ class ComponentWindow(QtWidgets.QLabel):
         self.update()            
                      
 class OutputWindow(QtWidgets.QLabel):
-    def __init__(self, componentInstances, weights, magPhaseRadio, innerRegion, parent = None):
+    def __init__(self, componentInstances, weights, selectedFourier, magPhaseRadio, innerRegion, parent = None):
         super().__init__(parent)   
-        self.setupVariables(componentInstances, weights, magPhaseRadio, innerRegion)
+        self.setupVariables(componentInstances, weights, selectedFourier, magPhaseRadio, innerRegion)
         self.addEventListeners()
 
-    def setupVariables(self, componentInstances, weights, magPhaseRadio, innerRegion):
+    def setupVariables(self, componentInstances, weights, selectedFourier, magPhaseRadio, innerRegion):
         self.setFixedSize(300, 300)
         self.componentInstances = componentInstances
         self.weights = weights
+        self.selectedFourier = selectedFourier
         self.magPhaseRadio = magPhaseRadio
         self.innerRegion = innerRegion
         self.outputScaledPixmap = None
@@ -405,10 +406,16 @@ class OutputWindow(QtWidgets.QLabel):
                     self.fillOuterRegions(currReal, self.componentInstances[i].realSpectrum, yStart, yEnd, xStart, xEnd)
                     self.fillOuterRegions(currImaginary, self.componentInstances[i].imaginarySpectrum, yStart, yEnd, xStart, xEnd)
 
-                self.totalMagnitudes += self.weights[i].value() / 100.0 * currMagnitude
-                self.totalPhases += self.weights[i].value() / 100.0 * currPhase
-                self.totalReal += self.weights[i].value() / 100.0 * currReal
-                self.totalImaginary += self.weights[i].value() / 100.0 * currImaginary
+                if self.selectedFourier[i].currentIndex() == 0:
+                    self.totalMagnitudes += self.weights[i].value() / 100.0 * currMagnitude
+                    self.totalPhases += 0 / 100.0 * currPhase
+                    self.totalReal += self.weights[i].value() / 100.0 * currReal
+                    self.totalImaginary += 0 / 100.0 * currImaginary
+                else:
+                    self.totalMagnitudes += 0 / 100.0 * currMagnitude
+                    self.totalPhases += self.weights[i].value() / 100.0 * currPhase
+                    self.totalReal += 0 / 100.0 * currReal
+                    self.totalImaginary += self.weights[i].value() / 100.0 * currImaginary
             
         if self.magPhaseRadio.isChecked(): 
             reconstructedFreqComponents = self.totalMagnitudes * np.exp(1j * self.totalPhases)
