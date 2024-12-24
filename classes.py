@@ -41,7 +41,7 @@ class InputWindow(QtWidgets.QLabel):
     def addEventListeners(self):
         self.mouseDoubleClickEvent = self.browseImage
         self.mousePressEvent = self.handleMousePress
-        self.mouseMoveEvent = self.handleMouseMovement
+        self.mouseMoveEvent = self.handleMouseMovement   #for handling contrast and brightness
         self.mouseReleaseEvent = self.handleMouseRelease
         
     def browseImage(self, event):
@@ -53,8 +53,8 @@ class InputWindow(QtWidgets.QLabel):
             cvImage = cv2.imread(file_path)
             self.originalBrowsed = cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
             self.browsed = np.copy(self.originalBrowsed)
-            self.addImage()
-            self.updateScaledImage()
+            self.addImage()   # changes the image into Qpixmap
+            self.updateScaledImage()  # scale the image size
             self.uploaded = True
         else:
             logging.error("Couldn't Browse Image")

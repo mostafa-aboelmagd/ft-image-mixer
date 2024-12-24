@@ -16,6 +16,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.outputPortRadio = self.radioButton1
         self.imageContainers = [self.original1, self.original2, self.original3, self.original4]
         self.fourierContainers = [self.component_image1, self.component_image2, self.component_image3, self.component_image4]
+        self.comboBoxes = [self.combo1, self.combo2, self.combo3, self.combo4]
+        for box in self.comboBoxes:
+            box.setStyleSheet("""
+            QComboBox {
+                color: white; /* Text color in the combo box */
+                background-color: #444; /* Background color */
+                border: 1px solid gray;
+                padding: 5px;
+            }
+            QComboBox QAbstractItemView {
+                color: white; /* Text color in the dropdown menu */
+                background-color: #222; /* Background color of dropdown */
+                selection-background-color: #555; /* Highlighted item background */
+                selection-color: white; /* Highlighted item text color */
+            }
+        """)
         self.sliders = [self.Slider_weight1, self.Slider_weight2, self.Slider_weight3, self.Slider_weight4]
         for slider in self.sliders:
             slider.setMinimum(0)
@@ -27,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for container in self.fourierContainers:
             container.regionResizedSignal.connect(self.unifyRegionSelectors)
         
-        self.outputPortRadio.toggled.connect(self.selectOutputPort)
+        self.outputPortRadio.toggled.connect(self.selectOutputPort)        
     
     def unifyRegionSelectors(self):
         triggeringContainer = self.sender() # gets the currently changed region so that the other regions are shaped according to it
