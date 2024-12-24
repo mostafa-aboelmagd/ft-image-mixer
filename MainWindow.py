@@ -57,18 +57,18 @@ class Ui_MainWindow(object):
 "        background-color: #7c3aed;\n"
 "    }\n"
 "    \n"
-"    QProgressBar {\n"
-"        border: 2px solid #7c3aed;\n"
-"        border-radius: 5px;\n"
-"        text-align: center;\n"
-"        color: white;\n"
-"        background-color: #2a2a3c;\n"
-"    }\n"
-"    \n"
-"    QProgressBar::chunk {\n"
-"        background-color: #7c3aed;\n"
-"        border-radius: 3px;\n"
-"    }\n"
+# "    QProgressBar {\n"
+# "        border: 2px solid #7c3aed;\n"
+# "        border-radius: 5px;\n"
+# "        text-align: center;\n"
+# "        color: white;\n"
+# "        background-color: #2a2a3c;\n"
+# "    }\n"
+# "    \n"
+# "    QProgressBar::chunk {\n"
+# "        background-color: #7c3aed;\n"
+# "        border-radius: 3px;\n"
+# "    }\n"
 "    \n"
 "    QFrame {\n"
 "        background-color: #2a2a3c;\n"
@@ -580,7 +580,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.mixerOutputTo.setFont(font)
         self.mixerOutputTo.setStyleSheet("color:white;\n"
-"font-size:20px;\n"
+"font-size:40px;\n"
 "margin: 0 0 ;")
         
         
@@ -648,17 +648,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout_output.setObjectName("horizontalLayout_output")
         self.verticalLayout_OP1 = QtWidgets.QVBoxLayout()
         self.verticalLayout_OP1.setObjectName("verticalLayout_OP1")
-        self.label_op1 = QtWidgets.QLabel(self.frame_right)
+        #self.label_op1 = QtWidgets.QLabel(self.frame_right)
         font = QtGui.QFont()
         font.setFamily("Oswald SemiBold")
         font.setPointSize(11)
         font.setBold(True)
         font.setWeight(75)
-        self.label_op1.setFont(font)
-        self.label_op1.setStyleSheet("color:white;\n"
-"font-weight:10000px;")
-        self.label_op1.setObjectName("label_op1")
-        self.verticalLayout_OP1.addWidget(self.label_op1, 0, QtCore.Qt.AlignHCenter)
+        #self.label_op1.setFont(font)
+        #self.label_op1.setStyleSheet("color:white;\n"
+#"font-weight:10000px;")
+        #self.label_op1.setObjectName("label_op1")
+        #self.verticalLayout_OP1.addWidget(self.label_op1, 0, QtCore.Qt.AlignHCenter)
         self.output1_port = OutputWindow([self.component_image1, self.component_image2, self.component_image3, self.component_image4], [self.Slider_weight1, self.Slider_weight2, self.Slider_weight3, self.Slider_weight4], self.mode1, self.radioButton_In, self.frame_right)
         self.output1_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output1_port.setObjectName("output1_port")
@@ -667,17 +667,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout_output.addLayout(self.verticalLayout_OP1)
         self.verticalLayout_OP2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_OP2.setObjectName("verticalLayout_OP2")
-        self.label_op2 = QtWidgets.QLabel(self.frame_right)
+        #self.label_op2 = QtWidgets.QLabel(self.frame_right)
         font = QtGui.QFont()
         font.setFamily("Oswald SemiBold")
         font.setPointSize(11)
         font.setBold(True)
         font.setWeight(75)
-        self.label_op2.setFont(font)
-        self.label_op2.setStyleSheet("color:white;\n"
-"font-weight:10000px;")
-        self.label_op2.setObjectName("label_op2")
-        self.verticalLayout_OP2.addWidget(self.label_op2, 0, QtCore.Qt.AlignHCenter)
+        #self.label_op2.setFont(font)
+        #self.label_op2.setStyleSheet("color:white;\n"
+#"font-weight:10000px;")
+        #self.label_op2.setObjectName("label_op2")
+        #self.verticalLayout_OP2.addWidget(self.label_op2, 0, QtCore.Qt.AlignHCenter)
         self.output2_port = OutputWindow([self.component_image1, self.component_image2, self.component_image3, self.component_image4], [self.Slider_weight1, self.Slider_weight2, self.Slider_weight3, self.Slider_weight4], self.mode1, self.radioButton_In, self.frame_right)
         self.output2_port.setStyleSheet("border: 3px solid rgb(17,17,17);")
         self.output2_port.setObjectName("output2_port")
@@ -689,51 +689,51 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_10.setContentsMargins(-1, -1, -1, 10)
         self.horizontalLayout_10.setObjectName("horizontalLayout_10")
-        self.mixxer = QtWidgets.QPushButton(self.frame_right)
+        # self.mixxer = QtWidgets.QPushButton(self.frame_right)
         font = QtGui.QFont()
         font.setFamily("-apple-system")
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.mixxer.setFont(font)
-        self.mixxer.setStyleSheet("QPushButton{\n"
-"  appearance: button;\n"
-"  background-color: #405cf5;\n"
-"  border-radius: 6px;\n"
-"  border-width: 0;\n"
-"  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;\n"
-"  color: #fff;\n"
-"  cursor: pointer;\n"
-"  font-family: -apple-system,system-ui,\"Segoe UI\",Roboto,\"Helvetica Neue\",Ubuntu,sans-serif;\n"
-"  height: 30px;\n"
-"  margin: 0 20px 0 20px;\n"
-"  position: center;\n"
-"  width:70px;\n"
-"}\n"
-"QPushButton:hover{\n"
-"background-color: #283999;\n"
-"}\n"
-"QPushButton:pressed{\n"
-"background-color: #1c2973;\n"
-"}\n"
-"")
+#         self.mixxer.setFont(font)
+#         self.mixxer.setStyleSheet("QPushButton{\n"
+# "  appearance: button;\n"
+# "  background-color: #405cf5;\n"
+# "  border-radius: 6px;\n"
+# "  border-width: 0;\n"
+# "  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;\n"
+# "  color: #fff;\n"
+# "  cursor: pointer;\n"
+# "  font-family: -apple-system,system-ui,\"Segoe UI\",Roboto,\"Helvetica Neue\",Ubuntu,sans-serif;\n"
+# "  height: 30px;\n"
+# "  margin: 0 20px 0 20px;\n"
+# "  position: center;\n"
+# "  width:70px;\n"
+# "}\n"
+# "QPushButton:hover{\n"
+# "background-color: #283999;\n"
+# "}\n"
+# "QPushButton:pressed{\n"
+# "background-color: #1c2973;\n"
+# "}\n"
+# "")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icons/combine-svgrepo-com.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.mixxer.setIcon(icon)
-        self.mixxer.setIconSize(QtCore.QSize(25, 25))
-        self.mixxer.setObjectName("mixxer")
-        self.horizontalLayout_10.addWidget(self.mixxer)
-        self.progressBar = QtWidgets.QProgressBar(self.frame_right)
+        # self.mixxer.setIcon(icon)
+        # self.mixxer.setIconSize(QtCore.QSize(25, 25))
+        # self.mixxer.setObjectName("mixxer")
+        # self.horizontalLayout_10.addWidget(self.mixxer)
+        # self.progressBar = QtWidgets.QProgressBar(self.frame_right)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
-        self.progressBar.setSizePolicy(sizePolicy)
-        self.progressBar.setStyleSheet("")
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setTextVisible(True)
-        self.progressBar.setObjectName("progressBar")
-        self.horizontalLayout_10.addWidget(self.progressBar)
+        # sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
+        # self.progressBar.setSizePolicy(sizePolicy)
+        # self.progressBar.setStyleSheet("")
+        # self.progressBar.setProperty("value", 0)
+        # self.progressBar.setTextVisible(True)
+        # self.progressBar.setObjectName("progressBar")
+        # self.horizontalLayout_10.addWidget(self.progressBar)
         self.verticalLayout_18.addLayout(self.horizontalLayout_10)
         self.line_17 = QtWidgets.QFrame(self.frame_right)
         self.line_17.setStyleSheet("/* Line style */\n"
@@ -774,13 +774,13 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.selectedArea.setFont(font)
         self.selectedArea.setStyleSheet("color:white;\n"
-"font-size:20px;\n"
+"font-size:40px;\n"
 "margin: 0 0 ;")
         self.selectedArea.setObjectName("selectedArea")
         self.verticalLayout_15.addWidget(self.selectedArea, 0, QtCore.Qt.AlignHCenter)
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
-        self.verticalLayout_7 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_7 = QtWidgets.QHBoxLayout()
         self.verticalLayout_7.setObjectName("verticalLayout_7")
         font = QtGui.QFont()
         font.setFamily("Oswald SemiBold")
@@ -809,38 +809,38 @@ class Ui_MainWindow(object):
         self.buttonGroup_2.addButton(self.radioButton_Out)
         self.verticalLayout_7.addWidget(self.radioButton_Out, 0, QtCore.Qt.AlignHCenter)
         self.horizontalLayout_9.addLayout(self.verticalLayout_7)
-        self.Deselect = QtWidgets.QPushButton(self.frame_right)
+        # self.Deselect = QtWidgets.QPushButton(self.frame_right)
         font = QtGui.QFont()
         font.setFamily("-apple-system")
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.Deselect.setFont(font)
-        self.Deselect.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.Deselect.setStyleSheet("QPushButton{\n"
-"  appearance: button;\n"
-"  background-color: #405cf5;\n"
-"  border-radius: 6px;\n"
-"  border-width: 0;\n"
-"  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;\n"
-"  color: #fff;\n"
-"  cursor: pointer;\n"
-"  font-family: -apple-system,system-ui,\"Segoe UI\",Roboto,\"Helvetica Neue\",Ubuntu,sans-serif;\n"
-"  height: 30px;\n"
-"  margin: 0 20px 0 20px;\n"
-"  position: center;\n"
-"  width:70px;\n"
-"}\n"
-"QPushButton:hover{\n"
-"background-color: #283999;\n"
-"}\n"
-"QPushButton:pressed{\n"
-"background-color: #1c2973;\n"
-"}\n"
-"")
-        self.Deselect.setIconSize(QtCore.QSize(25, 20))
-        self.Deselect.setObjectName("Deselect")
-        self.horizontalLayout_9.addWidget(self.Deselect)
+#         self.Deselect.setFont(font)
+#         self.Deselect.setLayoutDirection(QtCore.Qt.LeftToRight)
+#         self.Deselect.setStyleSheet("QPushButton{\n"
+# "  appearance: button;\n"
+# "  background-color: #405cf5;\n"
+# "  border-radius: 6px;\n"
+# "  border-width: 0;\n"
+# "  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;\n"
+# "  color: #fff;\n"
+# "  cursor: pointer;\n"
+# "  font-family: -apple-system,system-ui,\"Segoe UI\",Roboto,\"Helvetica Neue\",Ubuntu,sans-serif;\n"
+# "  height: 30px;\n"
+# "  margin: 0 20px 0 20px;\n"
+# "  position: center;\n"
+# "  width:70px;\n"
+# "}\n"
+# "QPushButton:hover{\n"
+# "background-color: #283999;\n"
+# "}\n"
+# "QPushButton:pressed{\n"
+# "background-color: #1c2973;\n"
+# "}\n"
+# "")
+        # self.Deselect.setIconSize(QtCore.QSize(25, 20))
+        # self.Deselect.setObjectName("Deselect")
+        # self.horizontalLayout_9.addWidget(self.Deselect)
         self.verticalLayout_15.addLayout(self.horizontalLayout_9)
         self.verticalLayout_16.addLayout(self.verticalLayout_15)
         self.verticalLayout_18.addLayout(self.verticalLayout_16)
@@ -883,13 +883,13 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.selectedArea_2.setFont(font)
         self.selectedArea_2.setStyleSheet("color:white;\n"
-"font-size:20px;\n"
+"font-size:40px;\n"
 "margin: 0 0 ;")
         self.selectedArea_2.setObjectName("selectedArea_2")
         self.verticalLayout_20.addWidget(self.selectedArea_2, 0, QtCore.Qt.AlignHCenter)
         self.horizontalLayout_14 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_14.setObjectName("horizontalLayout_14")
-        self.verticalLayout_21 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_21 = QtWidgets.QHBoxLayout()
         self.verticalLayout_21.setObjectName("verticalLayout_21")
         
         self.buttonGroup_3 = QtWidgets.QButtonGroup(MainWindow)
@@ -940,17 +940,17 @@ class Ui_MainWindow(object):
         self.label_12.setText(_translate("MainWindow", "FT Component"))
         self.combo4.setItemText(0, _translate("MainWindow", "FT Magnitude"))
         self.combo4.setItemText(1, _translate("MainWindow", "FT Phase"))
-        self.mixerOutputTo.setText(_translate("MainWindow", "Mixer Output To:"))
+        self.mixerOutputTo.setText(_translate("MainWindow", "Mixer Output"))
         self.radioButton1.setText(_translate("MainWindow", "Output 1"))
         self.radioButton2.setText(_translate("MainWindow", "Output 2"))
-        self.label_op1.setText(_translate("MainWindow", "Output 1"))
-        self.label_op2.setText(_translate("MainWindow", "Output 2"))
-        self.mixxer.setText(_translate("MainWindow", "Mix"))
+        # self.label_op1.setText(_translate("MainWindow", "Output 1"))
+        # self.label_op2.setText(_translate("MainWindow", "Output 2"))
+        # self.mixxer.setText(_translate("MainWindow", "Mix"))
         self.selectedArea.setText(_translate("MainWindow", "Selected Area"))
         self.radioButton_In.setText(_translate("MainWindow", "Inside Region"))
         self.radioButton_Out.setText(_translate("MainWindow", "Outside Region"))
-        self.Deselect.setText(_translate("MainWindow", "Deselect"))
-        self.selectedArea_2.setText(_translate("MainWindow", "Select Mode"))
+        # self.Deselect.setText(_translate("MainWindow", "Deselect"))
+        self.selectedArea_2.setText(_translate("MainWindow", "Selected Mode"))
         self.mode1.setText(_translate("MainWindow", "Mag and Phase"))
         self.mode2.setText(_translate("MainWindow", "Real and Imaginary"))
         self.mode1.setChecked(True)
