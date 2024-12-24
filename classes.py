@@ -6,7 +6,13 @@ from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QPainter
 import cv2
 import numpy as np
+import logging
 _translate = QtCore.QCoreApplication.translate
+
+# Basic configuration for logging
+logging.basicConfig(filename='app.log',  # Log messages will be written to 'app.log'
+                    level=logging.DEBUG,
+                    format='%(levelname)s - %(message)s')
 
 class InputWindow(QtWidgets.QLabel):
     imageUpdatedSignal = pyqtSignal() # Determines when to compute fourier components of the browsed image
@@ -40,14 +46,18 @@ class InputWindow(QtWidgets.QLabel):
         
     def browseImage(self, event):
         options = QFileDialog.Options()
+        logging.info("Browsing Image")
         file_path, _ = QFileDialog.getOpenFileName(self, directory='"D:\FT-Magnitude-Phase-Mixer"',filter= 'Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tiff)', options=options)
         if file_path:
+            logging.info("Browsed Successfully")
             cvImage = cv2.imread(file_path)
             self.originalBrowsed = cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
             self.browsed = np.copy(self.originalBrowsed)
             self.addImage()
             self.updateScaledImage()
             self.uploaded = True
+        else:
+            logging.error("Couldn't Browse Image")
 
     def addImage(self):
         img = cv2.resize(self.browsed, (self.width, self.height))
@@ -65,9 +75,14 @@ class InputWindow(QtWidgets.QLabel):
     def handleMousePress(self, event):
         if self.uploaded:
             if event.button() == Qt.LeftButton:
+                logging.info("Changing Brightness & Contrast")
                 self.mousePressed = True
                 self.initialX = event.x()
                 self.initialY = event.y()
+            else:
+                logging.warning("Press Left Mouse To Be Able To Change Brightness")
+        else:
+            logging.error("Can't Update Brightness Unless An Image Is Uploaded")
     
     # Manipulates Brightness & Contrast of image via moving the mouse horizontally and vertically respectively
     def handleMouseMovement(self, event):
@@ -126,6 +141,7 @@ class ComponentWindow(QtWidgets.QLabel):
     
     def computeFreqComponents(self):
         if self.originalWindowInstance.image:
+            logging.info("Started To Compute Fourier Components")
             originalQImage = self.originalWindowInstance.q_image
             width = self.originalWindowInstance.width
             height = self.originalWindowInstance.height 
@@ -154,7 +170,10 @@ class ComponentWindow(QtWidgets.QLabel):
                 self.showMagPhaseComponent()
             else:
                 self.showRealImagComponent()
-    
+
+        else:
+            logging.error("Tried To Compute Fourier For An Empty Input Image")
+
     def showMagPhaseComponent(self):
         if self.freqComponents is not None:
             if self.modeComboBox.currentIndex() == 0:
@@ -195,6 +214,7 @@ class ComponentWindow(QtWidgets.QLabel):
             self.showRealImagComponent()
     
     def onRegionToggled(self):
+        logging.info("Changed Region Type")
         self.update()  # Triggers the paintEvent method
         self.spectrumUpdatedSignal.emit()  
 
@@ -216,7 +236,9 @@ class ComponentWindow(QtWidgets.QLabel):
             return "bottomLeft"
         elif abs(point.x() - self.regionSelector.right()) < margin and abs(point.y() - self.regionSelector.bottom()) < margin:
             return "bottomRight"
-        return None
+        else:
+            logging.warning("Can't Resize Region Unless A Corner Is Pressed")
+            return None
 
     def mouseMoveEvent(self, event):
         if self.resizingRegion and self.regionCorner:
@@ -255,6 +277,8 @@ class ComponentWindow(QtWidgets.QLabel):
             self.update()
             self.regionResizedSignal.emit()
             self.spectrumUpdatedSignal.emit()
+        else:
+            logging.error("Can't Resize An Invisible Region")
 
     def mouseReleaseEvent(self, event):
         self.resizingRegion = False
@@ -344,6 +368,7 @@ class OutputWindow(QtWidgets.QLabel):
                 fullSpectrum = self.componentInstances[i].magnitudeSpectrum
                 break
         if fullSpectrum is None:
+            logging.warning("Can't mix without an image being uploaded")
             return
         
         # y represent the rows, while x represent the columns
