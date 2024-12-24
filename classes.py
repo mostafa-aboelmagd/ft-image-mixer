@@ -1,15 +1,21 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QLabel, QVBoxLayout
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtGui import QPixmap, QImage, QColor
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QEvent, pyqtSignal
+from PyQt5.QtCore import Qt, QRect, pyqtSignal
+from PyQt5.QtGui import QPainter
 import cv2
 import numpy as np
+import logging
 _translate = QtCore.QCoreApplication.translate
 
+# Basic configuration for logging
+logging.basicConfig(filename='app.log',  # Log messages will be written to 'app.log'
+                    level=logging.DEBUG,
+                    format='%(levelname)s - %(message)s')
+
 class InputWindow(QtWidgets.QLabel):
-    isBrowsed = pyqtSignal(str)
-    imageUpdatedSignal = pyqtSignal()
+    imageUpdatedSignal = pyqtSignal() # Determines when to compute fourier components of the browsed image
     
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -19,15 +25,15 @@ class InputWindow(QtWidgets.QLabel):
     def setupVariables(self):
         self.setFixedSize(300, 300)
         self.uploaded = False
-        self.originalBrowsed = None
-        self.browsed = None
+        self.originalBrowsed = None # Browsed image in grey scale
+        self.browsed = None # Copy of the original browsed which allows us to manipulate the brightness and contrast of the original grey scale image
         self.q_image = None
         self.image = None
         self.width = 300
         self.height = 300
         self.last_window_state = self.window().windowState()
-        self.mousePressed = False
-        self.initialX = 0 # Needed for controlling the brightness and contrast of our image
+        self.mousePressed = False # Needed for controlling the brightness and contrast of our image
+        self.initialX = 0
         self.initialY = 0
         self.currentBrightness = 0.0
         self.currentContrast = 1.0
@@ -40,42 +46,52 @@ class InputWindow(QtWidgets.QLabel):
         
     def browseImage(self, event):
         options = QFileDialog.Options()
+        logging.info("Browsing Image")
         file_path, _ = QFileDialog.getOpenFileName(self, directory='"D:\FT-Magnitude-Phase-Mixer"',filter= 'Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tiff)', options=options)
         if file_path:
-            cv_image = cv2.imread(file_path)
-            self.originalBrowsed = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            logging.info("Browsed Successfully")
+            cvImage = cv2.imread(file_path)
+            self.originalBrowsed = cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
             self.browsed = np.copy(self.originalBrowsed)
             self.addImage()
             self.updateScaledImage()
-            self.isBrowsed.emit(file_path)
             self.uploaded = True
-    
+        else:
+            logging.error("Couldn't Browse Image")
+
     def addImage(self):
         img = cv2.resize(self.browsed, (self.width, self.height))
         self.q_image = QImage(img.data, self.width, self.height, self.width, QImage.Format_Grayscale8)
         self.image = QPixmap.fromImage(self.q_image)
 
-    def updateScaledImage(self, event = None):
+    # Shows the browsed image after scaling it to fit into the UI container
+    def updateScaledImage(self):
         if self.image:
             self.clear()
-            scaled_pixmap = self.image.scaled(self.size(), transformMode= Qt.SmoothTransformation)
-            self.setPixmap(scaled_pixmap)         
+            scaledPixmap = self.image.scaled(self.size(), transformMode= Qt.SmoothTransformation)
+            self.setPixmap(scaledPixmap)         
             self.imageUpdatedSignal.emit()
 
     def handleMousePress(self, event):
         if self.uploaded:
             if event.button() == Qt.LeftButton:
+                logging.info("Changing Brightness & Contrast")
                 self.mousePressed = True
                 self.initialX = event.x()
                 self.initialY = event.y()
+            else:
+                logging.warning("Press Left Mouse To Be Able To Change Brightness")
+        else:
+            logging.error("Can't Update Brightness Unless An Image Is Uploaded")
     
+    # Manipulates Brightness & Contrast of image via moving the mouse horizontally and vertically respectively
     def handleMouseMovement(self, event):
         if self.mousePressed:
+            verticalMovement = self.initialY - event.y()
             horizontalMovement = event.x() - self.initialX
-            verticalMovement = event.y() - self.initialY
 
-            self.currentBrightness = np.clip(self.currentBrightness + horizontalMovement // 10, -50, 200) # Limits the brightness values between -50 and 200
-            self.currentContrast = np.clip(self.currentContrast + (verticalMovement // 100) * 0.1, 0.5, 2.0) # Multiplying by 0.1 prevents drastic contrast shifts
+            self.currentBrightness = np.clip(self.currentBrightness + verticalMovement // 10, -50, 200) # Limits the brightness values between -50 and 200
+            self.currentContrast = np.clip(self.currentContrast + (horizontalMovement // 100) * 0.1, 0.5, 2.0) # Multiplying by 0.1 prevents major contrast shifts
 
             newImage = cv2.convertScaleAbs(self.originalBrowsed, alpha=self.currentContrast, beta=self.currentBrightness) # alpha scales the pixel values, while beta adds an offset
             newImage = np.clip(newImage, 0, 255) # Ensures that all pixel values are clipped to this valid range
@@ -91,186 +107,330 @@ class InputWindow(QtWidgets.QLabel):
 
 class ComponentWindow(QtWidgets.QLabel):
     spectrumUpdatedSignal = pyqtSignal()
-    
-    def __init__(self, input_window_instance, mode_combo_box, magPhase_radio, realImaginary_radio, parent = None):
-        super().__init__(parent)
-        self.setFixedSize(300, 300)
-        self.original_window_instance = input_window_instance
-        self.mode_combo_box = mode_combo_box  # combo box for choosing the spectrum to show in the label
-        self.magPhase_radio = magPhase_radio  # mode1 radio btn
-        self.realImaginary_radio = realImaginary_radio  # mode2 radio btn
-        self.original_window_instance.imageUpdatedSignal.connect(self.computeFreqComponents)  # when an input image is uploaded, compute its fft
-        self.freq_components = None
+    regionResizedSignal = pyqtSignal()
 
-        self.mode_combo_box.currentIndexChanged.connect(self.selectMode) # when toggling the comboBox, go to selectMode method which leads you to showing the correct spectrum
-        self.realImaginary_radio.toggled.connect(self.selectMode)  # when toggling the radio btn, go to selectMode method to choose the selected mode and show the corresponding spectrum
+    def __init__(self, inputWindowInstance, modeComboBox, magPhaseRadio, innerRegion, parent = None):
+        super().__init__(parent)
+        self.setupVariables(inputWindowInstance, modeComboBox, magPhaseRadio, innerRegion)
+        self.addEventListeners()
+    
+    def setupVariables(self, inputWindowInstance, modeComboBox, magPhaseRadio, innerRegion):
+        self.setFixedSize(300, 300)
+        self.freqComponents = None
+        self.magnitudeSpectrum = None
+        self.magnitudeNormalized = None
+        self.phaseSpectrum = None
+        self.phaseNormalized = None
+        self.realSpectrum = None
+        self.realNormalized = None
+        self.imaginarySpectrum = None
+        self.imaginaryNormalized = None
+        self.originalWindowInstance = inputWindowInstance
+        self.modeComboBox = modeComboBox  # Combo box for choosing the spectrum that's shown in the UI container (magnitude or phase or real or imaginary)
+        self.magPhaseRadio = magPhaseRadio  # Radio button that decides which of the fourier components are shown in the combobox (either magnitude & phase or real and imaginary)
+        self.innerRegion = innerRegion # Radio button that decides which region the mixing should use (inner or outer)
+        self.regionSelector = QRect(0, 0, self.width(), self.height())
+        self.resizingRegion = False
+        self.regionCorner = None # Which of the 4 corners of the region selector is the user clicking on
+        
+    def addEventListeners(self):
+        self.originalWindowInstance.imageUpdatedSignal.connect(self.computeFreqComponents)  # When an input image is uploaded or updated, compute its fft
+        self.modeComboBox.currentIndexChanged.connect(self.selectMode)
+        self.magPhaseRadio.toggled.connect(self.selectMode)
+        self.innerRegion.toggled.connect(self.onRegionToggled)
     
     def computeFreqComponents(self):
-        if self.original_window_instance.image:
-            # changing the pixmap to a 2d array (image height, image width) to compute its fourier components
-           
-            original_q_image = self.original_window_instance.q_image
-            width = self.original_window_instance.width  # width and height are used in forming the shape(dimensions) of the formed array
-            height = self.original_window_instance.height 
-            ptr = original_q_image.bits()
+        if self.originalWindowInstance.image:
+            logging.info("Started To Compute Fourier Components")
+            originalQImage = self.originalWindowInstance.q_image
+            width = self.originalWindowInstance.width
+            height = self.originalWindowInstance.height 
+            ptr = originalQImage.bits()
             ptr.setsize(width * height)
-            self.original_img_array = np.frombuffer(ptr, np.uint8).reshape((height, width)) # 2d array representing the img to compute its fourier transform
+            originalImgArray = np.frombuffer(ptr, np.uint8).reshape((height, width)) # 2d array representing the img to compute its fourier transform
+
+            self.freqComponents = np.fft.fft2(originalImgArray)
+            shiftedFreqComponents = np.fft.fftshift(self.freqComponents) # Shifting frequencies to get the low frequencies in the middle
             
-            self.freq_components = np.fft.fft2(self.original_img_array)
-            self.shifted_freq_components = np.fft.fftshift(self.freq_components) # shifting frequencies to get the low frequencies in the middle
+            self.magnitudeSpectrum = np.abs(shiftedFreqComponents)
+            magnitudeLoggedSpectrum = np.log(self.magnitudeSpectrum) # taking the log to minimize its range
+            self.magnitudeNormalized = cv2.normalize(magnitudeLoggedSpectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
             
-            # magnitude spectrum
-            self.magnitude_spectrum = np.abs(self.shifted_freq_components)
-            self.magnitude_logged_spectrum = np.log(self.magnitude_spectrum) # taking the log to minimize its range
-            self.magnitude_normalized = cv2.normalize(
-                self.magnitude_logged_spectrum, None, 0, 255, cv2.NORM_MINMAX
-            ).astype(np.uint8)
+            self.phaseSpectrum = np.angle(shiftedFreqComponents)
+            self.phaseNormalized = cv2.normalize(self.phaseSpectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
             
-            # phase spectrum
-            self.phase_spectrum = np.angle(self.shifted_freq_components)   # calculating phase spectrum
-            self.phase_normalized = cv2.normalize(self.phase_spectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+            self.realSpectrum = np.real(shiftedFreqComponents)
+            realLoggedSpectrum = np.log(self.realSpectrum)
+            self.realNormalized = cv2.normalize(realLoggedSpectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
             
-            # real spectrum
-            self.real_spectrum = np.real(self.shifted_freq_components)
-            self.real_logged_spectrum = np.log(self.real_spectrum)
-            self.real_normalized = cv2.normalize(self.real_logged_spectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-            
-            # imaginary spectrum
-            self.imaginary_spectrum = np.imag(self.shifted_freq_components)
-            self.imaginary_normalized = cv2.normalize(self.imaginary_spectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-            
-            # choosing the mode to show depending on the checked radio btn (magPhase or realImaginary)
-            if not self.realImaginary_radio.isChecked(): 
+            self.imaginarySpectrum = np.imag(shiftedFreqComponents)
+            self.imaginaryNormalized = cv2.normalize(self.imaginarySpectrum, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        
+            if self.magPhaseRadio.isChecked(): 
                 self.showMagPhaseComponent()
             else:
                 self.showRealImagComponent()
-    
-    
-    def selectMode(self):    # select 'mag and phase' mode or 'real and img' mode according to the selected radio button
-        if not self.realImaginary_radio.isChecked(): 
-            self.mode_combo_box.setItemText(0, _translate("MainWindow", "FT Magnitude"))
-            self.mode_combo_box.setItemText(1, _translate("MainWindow", "FT Phase"))
-            self.showMagPhaseComponent()
-                
-                
-        elif self.realImaginary_radio.isChecked():
-            self.mode_combo_box.setItemText(0, _translate("MainWindow", "FT Real"))
-            self.mode_combo_box.setItemText(1, _translate("MainWindow", "FT Img"))
-            self.showRealImagComponent()
-            
-            
-            
 
-    
+        else:
+            logging.error("Tried To Compute Fourier For An Empty Input Image")
+
     def showMagPhaseComponent(self):
-        if self.freq_components is not None:  # if there is an image found whose fft is computed (the label isn't empty)
-            if self.mode_combo_box.currentIndex() == 0:
-                        height, width = self.magnitude_normalized.shape
-                        freq_q_image = QImage(self.magnitude_normalized.data, width, height, width, QImage.Format_Grayscale8 )
+        if self.freqComponents is not None:
+            if self.modeComboBox.currentIndex() == 0:
+                height, width = self.magnitudeNormalized.shape
+                freqQImage = QImage(self.magnitudeNormalized.data, width, height, width, QImage.Format_Grayscale8)
             else:
-                height, width = self.phase_normalized.shape
-                freq_q_image = QImage(self.phase_normalized.data, width, height, width, QImage.Format_Grayscale8)
-            freq_spectrum_pixmap = QPixmap.fromImage(freq_q_image)    #changing from qimage to pixmap
-            freq_spectrum_scaled_pixmap = freq_spectrum_pixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation) # scaling the freq spectrum img(after changing to pixmap) to be equal to the label size
-            self.setPixmap(freq_spectrum_scaled_pixmap)   #showing the scaled pixmap
-            self.spectrumUpdatedSignal.emit()
-        
+                height, width = self.phaseNormalized.shape
+                freqQImage = QImage(self.phaseNormalized.data, width, height, width, QImage.Format_Grayscale8)
+
+            freqSpectrumPixmap = QPixmap.fromImage(freqQImage)
+            freqSpectrumScaledPixmap = freqSpectrumPixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation)
+            self.setPixmap(freqSpectrumScaledPixmap)
+            self.spectrumUpdatedSignal.emit()  
         
     def showRealImagComponent(self):
-        if self.freq_components is not None:
-            if self.mode_combo_box.currentIndex() == 0:
-                    height, width = self.real_normalized.shape
-                    freq_q_image = QImage(self.real_normalized.data, width, height, width, QImage.Format_Grayscale8 )
-        
+        if self.freqComponents is not None:
+            if self.modeComboBox.currentIndex() == 0:
+                height, width = self.realNormalized.shape
+                freqQImage = QImage(self.realNormalized.data, width, height, width, QImage.Format_Grayscale8 )
             else:
-                height, width = self.imaginary_normalized.shape
-                freq_q_image = QImage(self.imaginary_normalized.data, width, height, width, QImage.Format_Grayscale8 )
+                height, width = self.imaginaryNormalized.shape
+                freqQImage = QImage(self.imaginaryNormalized.data, width, height, width, QImage.Format_Grayscale8 )
                 
-            freq_spectrum_pixmap = QPixmap.fromImage(freq_q_image)  
-            freq_spectrum_scaled_pixmap = freq_spectrum_pixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation) # scaling the freq spectrum img(after changing to pixmap) to be equal to the label size
-            self.setPixmap(freq_spectrum_scaled_pixmap) 
+            freqSpectrumPixmap = QPixmap.fromImage(freqQImage)  
+            freqSpectrumScaledPixmap = freqSpectrumPixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation)
+            self.setPixmap(freqSpectrumScaledPixmap) 
             self.spectrumUpdatedSignal.emit()
-            
-            
-            
-            
+     
+    def selectMode(self):
+        if self.magPhaseRadio.isChecked(): 
+            self.modeComboBox.setItemText(0, _translate("MainWindow", "FT Magnitude"))
+            self.modeComboBox.setItemText(1, _translate("MainWindow", "FT Phase"))
+            self.showMagPhaseComponent()
+                
+        else:
+            self.modeComboBox.setItemText(0, _translate("MainWindow", "FT Real"))
+            self.modeComboBox.setItemText(1, _translate("MainWindow", "FT Img"))
+            self.showRealImagComponent()
+    
+    def onRegionToggled(self):
+        logging.info("Changed Region Type")
+        self.update()  # Triggers the paintEvent method
+        self.spectrumUpdatedSignal.emit()  
+
+    # Check if the user clicked on any of the region's corners
+    def mousePressEvent(self, event):
+        if self.originalWindowInstance.image and self.regionSelector.contains(event.pos()):
+            self.resizingRegion = True
+            self.regionCorner = self.getCorner(event.pos())
+    
+    def getCorner(self, point):
+        margin = 20  # Margin of error for detecting proximity to corners
+
+        # Check proximity to each corner within the margin
+        if abs(point.x() - self.regionSelector.left()) < margin and abs(point.y() - self.regionSelector.top()) < margin:
+            return "topLeft"
+        elif abs(point.x() - self.regionSelector.right()) < margin and abs(point.y() - self.regionSelector.top()) < margin:
+            return "topRight"
+        elif abs(point.x() - self.regionSelector.left()) < margin and abs(point.y() - self.regionSelector.bottom()) < margin:
+            return "bottomLeft"
+        elif abs(point.x() - self.regionSelector.right()) < margin and abs(point.y() - self.regionSelector.bottom()) < margin:
+            return "bottomRight"
+        else:
+            logging.warning("Can't Resize Region Unless A Corner Is Pressed")
+            return None
+
+    def mouseMoveEvent(self, event):
+        if self.resizingRegion and self.regionCorner:
+            newRegion = self.regionSelector
+
+            # Update the region size based on the corner being dragged
+            if self.regionCorner == "topLeft":
+                newRegion.setTopLeft(event.pos())
+            elif self.regionCorner == "topRight":
+                newRegion.setTopRight(event.pos())
+            elif self.regionCorner == "bottomLeft":
+                newRegion.setBottomLeft(event.pos())
+            elif self.regionCorner == "bottomRight":
+                newRegion.setBottomRight(event.pos())
+
+            # Constrain the region within UI container boundaries
+            newRegion.setLeft(max(0, newRegion.left()))
+            newRegion.setTop(max(0, newRegion.top()))
+            newRegion.setRight(min(self.width(), newRegion.right()))
+            newRegion.setBottom(min(self.height(), newRegion.bottom()))
+
+            # Ensure sides do not cross over
+            if newRegion.left() >= newRegion.right():
+                if self.regionCorner in ["topLeft", "bottomLeft"]:
+                    newRegion.setLeft(newRegion.right() - 5)
+                else:
+                    newRegion.setRight(newRegion.left() + 5)
+
+            if newRegion.top() >= newRegion.bottom():
+                if self.regionCorner in ["topLeft", "topRight"]:
+                    newRegion.setTop(newRegion.bottom() - 5)
+                else:
+                    newRegion.setBottom(newRegion.top() + 5)
+
+            self.regionSelector = newRegion
+            self.update()
+            self.regionResizedSignal.emit()
+            self.spectrumUpdatedSignal.emit()
+        else:
+            logging.error("Can't Resize An Invisible Region")
+
+    def mouseReleaseEvent(self, event):
+        self.resizingRegion = False
+        self.regionCorner = None
+
+    def paintEvent(self, event):
+        super().paintEvent(event) # Combines the default QLabel rendering with our additions
+        if not self.originalWindowInstance.image:
+            return
+        
+        transparentRed = QColor(255, 0, 0, 20)
+        painter = QPainter(self)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(transparentRed)
+
+        # Draws the transparent colored part showcasing which region is selected (inside region selector or outside it)
+        if self.innerRegion.isChecked():
+            painter.drawRect(self.regionSelector)
+        else:
+            painter.drawRect(0, 0, self.width(), self.regionSelector.top())  # Top area
+            painter.drawRect(0, self.regionSelector.bottom(), self.width(), self.height() - self.regionSelector.bottom())  # Bottom area
+            painter.drawRect(0, self.regionSelector.top(), self.regionSelector.left(), self.regionSelector.height())  # Left area
+            painter.drawRect(self.regionSelector.right(), self.regionSelector.top(), self.width() - self.regionSelector.right(), self.regionSelector.height())  # Right area
+
+        # Draws handles at each corner of the region
+        painter.setBrush(Qt.blue)
+        cornerSize = 8
+        painter.drawRect(self.regionSelector.topLeft().x() - cornerSize, self.regionSelector.topLeft().y() - cornerSize, cornerSize * 2, cornerSize * 2)
+        painter.drawRect(self.regionSelector.topRight().x() - cornerSize, self.regionSelector.topRight().y() - cornerSize, cornerSize * 2, cornerSize * 2)
+        painter.drawRect(self.regionSelector.bottomLeft().x() - cornerSize, self.regionSelector.bottomLeft().y() - cornerSize, cornerSize * 2, cornerSize * 2)
+        painter.drawRect(self.regionSelector.bottomRight().x() - cornerSize, self.regionSelector.bottomRight().y() - cornerSize, cornerSize * 2, cornerSize * 2)
+    
+    # Needed for unifying all 4 different region selectors for component window class instances
+    def getRegionVertices(self):
+        return {
+            "topLeft": self.regionSelector.topLeft(),
+            "topRight": self.regionSelector.topRight(),
+            "bottomLeft": self.regionSelector.bottomLeft(),
+            "bottomRight": self.regionSelector.bottomRight(),
+        }
+    
+    def setRegion(self, topLeft, topRight, bottomLeft, bottomRight):
+        # Ensure the region is valid
+        if topLeft.x() >= topRight.x() or bottomLeft.x() >= bottomRight.x() or topLeft.y() >= bottomLeft.y() or topRight.y() >= bottomRight.y():
+            return
+
+        # Set the rectangle based on the provided vertices
+        self.regionSelector.setTopLeft(topLeft)
+        self.regionSelector.setTopRight(topRight)
+        self.regionSelector.setBottomLeft(bottomLeft)
+        self.regionSelector.setBottomRight(bottomRight)
+
+        # Constrain the rectangle within the UI cotnainer's bounds
+        self.regionSelector.setLeft(max(0, self.regionSelector.left()))
+        self.regionSelector.setTop(max(0, self.regionSelector.top()))
+        self.regionSelector.setRight(min(self.width(), self.regionSelector.right()))
+        self.regionSelector.setBottom(min(self.height(), self.regionSelector.bottom()))
+
+        # Triggers the paintEvent method
+        self.update()            
+                     
 class OutputWindow(QtWidgets.QLabel):
-    def __init__(self, component_instance1, component_instance2, component_instance3, component_instance4, realImaginary_radio, parent = None):
+    def __init__(self, componentInstances, weights, magPhaseRadio, innerRegion, parent = None):
         super().__init__(parent)   
+        self.setupVariables(componentInstances, weights, magPhaseRadio, innerRegion)
+        self.addEventListeners()
+
+    def setupVariables(self, componentInstances, weights, magPhaseRadio, innerRegion):
         self.setFixedSize(300, 300)
-        self.component_instance1 = component_instance1
-        self.component_instance2 = component_instance2
-        self.component_instance3 = component_instance3
-        self.component_instance4 = component_instance4
-        self.realImaginary_radio = realImaginary_radio
-        self.output_scaled_pixmap = None
-        
-        
-        self.component_instance1.spectrumUpdatedSignal.connect(self.showReconstructedImage)
-        self.component_instance2.spectrumUpdatedSignal.connect(self.showReconstructedImage)
-        self.component_instance3.spectrumUpdatedSignal.connect(self.showReconstructedImage)
-        self.component_instance4.spectrumUpdatedSignal.connect(self.showReconstructedImage)
-        
+        self.componentInstances = componentInstances
+        self.weights = weights
+        self.magPhaseRadio = magPhaseRadio
+        self.innerRegion = innerRegion
+        self.outputScaledPixmap = None
+        self.selected = False
+    
+    def addEventListeners(self):
+        for componentInstance in self.componentInstances:
+            componentInstance.spectrumUpdatedSignal.connect(self.showReconstructedImage)
+        for weight in self.weights:
+            weight.valueChanged.connect(self.showReconstructedImage)
+            
     def showReconstructedImage(self):
-        self.total_magnitudes = np.zeros((300, 300))
-        self.total_phases = np.zeros((300, 300))
-        self.total_real = np.zeros((300, 300))
-        self.total_imaginary = np.zeros((300, 300))
-        # mixing first frequency components
-        if self.component_instance1.freq_components is not None:   
-            component1_magnitudes = self.component_instance1.magnitude_spectrum
-            component1_phases = self.component_instance1.phase_spectrum
-            component1_real = self.component_instance1.real_spectrum
-            component1_imaginary = self.component_instance1.imaginary_spectrum
-            self.total_magnitudes += component1_magnitudes 
-            self.total_phases += component1_phases
-            self.total_real += component1_real
-            self.total_imaginary += component1_imaginary
-        # mixing second frequency components
-        if self.component_instance2.freq_components is not None:
-            component2_magnitudes = self.component_instance2.magnitude_spectrum
-            component2_phases = self.component_instance2.phase_spectrum
-            component2_real = self.component_instance2.real_spectrum
-            component2_imaginary = self.component_instance2.imaginary_spectrum
-            self.total_magnitudes += component2_magnitudes 
-            self.total_phases += component2_phases
-            self.total_real += component2_real
-            self.total_imaginary += component2_imaginary
-        # mixing third frequency componenets
-        if self.component_instance3.freq_components is not None:
-            component3_magnitudes = self.component_instance3.magnitude_spectrum
-            component3_phases = self.component_instance3.phase_spectrum
-            component3_real = self.component_instance3.real_spectrum
-            component3_imaginary = self.component_instance3.imaginary_spectrum
-            self.total_magnitudes += component3_magnitudes 
-            self.total_phases += component3_phases
-            self.total_real += component3_real
-            self.total_imaginary += component3_imaginary
-        # mixing fourth frequency components
-        if self.component_instance4.freq_components is not None:
-            component4_magnitudes = self.component_instance4.magnitude_spectrum
-            component4_phases = self.component_instance4.phase_spectrum
-            component4_real = self.component_instance4.real_spectrum
-            component4_imaginary = self.component_instance4.imaginary_spectrum
-            self.total_magnitudes += component4_magnitudes 
-            self.total_phases += component4_phases
-            self.total_real += component4_real
-            self.total_imaginary += component4_imaginary
-            
-        if not self.realImaginary_radio.isChecked(): 
-            reconstructed_freq_components = self.total_magnitudes * np.exp(1j * self.total_phases)
-            print("combining mags and phases")
-        elif self.realImaginary_radio.isChecked(): 
-            reconstructed_freq_components = self.total_real + 1j * self.total_imaginary
-            print("combining real and imaginary")
-            
-        reconstructed_img_array = np.abs(np.fft.ifft2(reconstructed_freq_components))
-        reconstructed_img_normalized_array = cv2.normalize(reconstructed_img_array, None, 0, 255,  cv2.NORM_MINMAX).astype(np.uint8)
-        height, width = reconstructed_img_normalized_array.shape
-        reconstructed_q_image = QImage(reconstructed_img_normalized_array.data, width, height, width, QImage.Format_Grayscale8 )
-        output_pixmap = QPixmap.fromImage(reconstructed_q_image)
-        self.output_scaled_pixmap = output_pixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation)
- 
-        self.setPixmap(self.output_scaled_pixmap)
+        fullSpectrum = None
+        for i in range(len(self.componentInstances)):
+            if self.componentInstances[i].freqComponents is not None:
+                fullSpectrum = self.componentInstances[i].magnitudeSpectrum
+                break
+        if fullSpectrum is None:
+            logging.warning("Can't mix without an image being uploaded")
+            return
         
-        #print(f"diff bet original and reconstructed: {(np.abs(self.component_instance1.original_img_array - reconstructed_img_array))}")
+        # y represent the rows, while x represent the columns
+        xStart, yStart = self.componentInstances[0].regionSelector.left(), self.componentInstances[0].regionSelector.top()
+        xEnd, yEnd = self.componentInstances[0].regionSelector.right(), self.componentInstances[0].regionSelector.bottom()
+
+        if self.innerRegion.isChecked():
+            croppedShape = fullSpectrum[yStart : yEnd, xStart : xEnd].shape
+        else:
+            croppedShape = fullSpectrum.shape
+  
+        self.totalMagnitudes = np.zeros(croppedShape)
+        self.totalPhases = np.zeros(croppedShape)
+        self.totalReal = np.zeros(croppedShape)
+        self.totalImaginary = np.zeros(croppedShape)
+
+        for i in range(len(self.componentInstances)):
+            if self.componentInstances[i].freqComponents is not None:
+                if self.innerRegion.isChecked():
+                    currMagnitude = self.componentInstances[i].magnitudeSpectrum[yStart : yEnd, xStart : xEnd]
+                    currPhase = self.componentInstances[i].phaseSpectrum[yStart : yEnd, xStart : xEnd]
+                    currReal = self.componentInstances[i].realSpectrum[yStart : yEnd, xStart : xEnd]
+                    currImaginary = self.componentInstances[i].imaginarySpectrum[yStart : yEnd, xStart : xEnd]
+                    
+                else:
+                    # Outer regions (top, bottom, left, and right)
+                    currMagnitude = np.zeros_like(fullSpectrum)
+                    currPhase = np.zeros_like(fullSpectrum)
+                    currReal = np.zeros_like(fullSpectrum)
+                    currImaginary = np.zeros_like(fullSpectrum)
+
+                    self.fillOuterRegions(currMagnitude, self.componentInstances[i].magnitudeSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currPhase, self.componentInstances[i].phaseSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currReal, self.componentInstances[i].realSpectrum, yStart, yEnd, xStart, xEnd)
+                    self.fillOuterRegions(currImaginary, self.componentInstances[i].imaginarySpectrum, yStart, yEnd, xStart, xEnd)
+
+                self.totalMagnitudes += self.weights[i].value() / 100.0 * currMagnitude
+                self.totalPhases += self.weights[i].value() / 100.0 * currPhase
+                self.totalReal += self.weights[i].value() / 100.0 * currReal
+                self.totalImaginary += self.weights[i].value() / 100.0 * currImaginary
+            
+        if self.magPhaseRadio.isChecked(): 
+            reconstructedFreqComponents = self.totalMagnitudes * np.exp(1j * self.totalPhases)
+        else: 
+            reconstructedFreqComponents = self.totalReal + 1j * self.totalImaginary
+            
+        reconstructedImgArray = np.abs(np.fft.ifft2(reconstructedFreqComponents))
+        reconstructedImgNormalizedArray = cv2.normalize(reconstructedImgArray, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        height, width = reconstructedImgNormalizedArray.shape
+        reconstructedQImage = QImage(reconstructedImgNormalizedArray.data, width, height, width, QImage.Format_Grayscale8 )
+        outputPixmap = QPixmap.fromImage(reconstructedQImage)
+        self.outputScaledPixmap = outputPixmap.scaled(self.size(), transformMode= Qt.SmoothTransformation)
+        if self.selected:
+            self.setPixmap(self.outputScaledPixmap)
+    
+    # Gets the fourier components of the outer region
+    def fillOuterRegions(self, currSpectrum, sourceSpectrum, yStart, yEnd, xStart, xEnd):
+        # Top region
+        currSpectrum[:yStart, :] = sourceSpectrum[:yStart, :]
+        # Bottom region
+        currSpectrum[yEnd:, :] = sourceSpectrum[yEnd:, :]
+        # Left region
+        currSpectrum[yStart:yEnd, :xStart] = sourceSpectrum[yStart:yEnd, :xStart]
+        # Right region
+        currSpectrum[yStart:yEnd, xEnd:] = sourceSpectrum[yStart:yEnd, xEnd:]
