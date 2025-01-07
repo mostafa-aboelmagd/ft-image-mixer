@@ -1,5 +1,5 @@
 # FT Image Mixer
-![alt text](screenshots/home.png)
+![Main Picture](screenshots/home.png)
 
 
 ## Description
