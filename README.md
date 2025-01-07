@@ -21,11 +21,11 @@
 
 ![alt text](screenshots/browse.gif)
 ### 2. Manipulation Of Image's FT Components
-- Changing Its Magnitude And Phase Components
+- Change Its Magnitude And Phase Components
 
 ![alt text](screenshots/magnitude_phase.gif)
 &nbsp;
-- Changing Its Real And Imaginary Components
+- Change Its Real And Imaginary Components
 
 ![alt text](screenshots/real_imaginary.gif)
 ### 3. Selected Region
