@@ -71,7 +71,7 @@
 
 5. Run `main.py` File
     ```bash
-    python MainWindow.py
+    python main.py
     ```
 
 ## Contributors
