@@ -33,7 +33,7 @@
    
 ![Resizing Inner Region GIF](screenshots/inner_region.gif)
 &nbsp;
-- Real Time Toggling Between Inner Region & Outer Region Of The Selected Area
+- Real Time Toggling Between Inner Region (Low Frequencies) & Outer Region (High Frequencies) Of The Selected Area
    
 ![Toggling Between Inner & Outer Region GIF](screenshots/region_toggle.gif)
 ### 4. Mixing Multiple Images
