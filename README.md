@@ -19,39 +19,39 @@
 ### 1. Image Browsing
 - Browse Any Image By Double Clicking On The Input Widget
 
-![alt text](screenshots/browse.gif)
+![Image Browsing GIF](screenshots/browse.gif)
 ### 2. Manipulation Of Image's FT Components
 - Change Its Magnitude And Phase Components
 
-![alt text](screenshots/magnitude_phase.gif)
+![Changing Magnitude & Phase GIF](screenshots/magnitude_phase.gif)
 &nbsp;
 - Change Its Real And Imaginary Components
 
-![alt text](screenshots/real_imaginary.gif)
+![Changing Real & Imaginary GIF](screenshots/real_imaginary.gif)
 ### 3. Selected Region
 - Dynamically Resize The Selected Area Of FT Component
    
-![alt text](screenshots/inner_region.gif)
+![Resizing Inner Region GIF](screenshots/inner_region.gif)
 &nbsp;
 - Real Time Toggling Between Inner Region & Outer Region Of The Selected Area
    
-![alt text](screenshots/region_toggle.gif)
+![Toggling Between Inner & Outer Region GIF](screenshots/region_toggle.gif)
 ### 4. Mixing Multiple Images
 - Combine Multiple Images Using Customizable Weights For Each Component
    
-![alt text](screenshots/mixing.gif)
+![Mixing Multiple Images GIF](screenshots/mixing.gif)
 ### 5. Beamforming
 - 5G Mode Showcasing Beam Pattern Analysis & Interference Pattern
    
-![alt text](screenshots/main.gif)
+![Beamforming Start Page GIF](screenshots/main.gif)
 &nbsp;
 - Changing Properties For Each Array Unit
 
-![alt text](screenshots/spacing_position.gif)
+![Changing Spacing & Position Of Array Unit GIF](screenshots/spacing_position.gif)
 &nbsp;
 - Tumor Ablation Scenario Where The Ultrasound Is Focused On A Target Point
 
-![alt text](screenshots/cancer.gif)
+![Cancer Scenario GIF](screenshots/cancer.gif)
 
 ## Installation
 
@@ -73,6 +73,8 @@
     ```bash
     python main.py
     ```
+
+6. To Open The Beamforming, Navigate To `Beamforming Simulator` Directory, Then Run The `main.py` File Inside It
 
 ## Contributors
 
