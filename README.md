@@ -1,4 +1,4 @@
-# Image Mixer
+# FT Image Mixer
 ![alt text](screenshots/home.png)
 
 
