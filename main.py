@@ -58,16 +58,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def selectOutputPort(self):
         if self.outputPortRadio.isChecked():
-            self.output2_port.clear()
             self.output2_port.selected = False
-
             self.output1_port.selected = True
             if self.output1_port.outputScaledPixmap is not None:
                 self.output1_port.setPixmap(self.output1_port.outputScaledPixmap)            
         else:
-            self.output1_port.clear()
             self.output1_port.selected = False
-
             self.output2_port.selected = True
             if self.output2_port.outputScaledPixmap is not None:
                 self.output2_port.setPixmap(self.output2_port.outputScaledPixmap)
